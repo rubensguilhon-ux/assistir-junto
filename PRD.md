@@ -716,5 +716,6 @@ Só as decisões que mudam a implementação. As do case (D1 a D4, D6, D10, D14,
 - Design system Assistir Junto: https://claude.ai/artifact/UDbAyLBApvyBgRb1kjWkX8
 - Teste de leitura da TV: https://claude.ai/artifact/6jRyaUDysrxpRUWmitrjkL
 - Case original no Behance: https://www.behance.net/gallery/202425711/Estudo-de-caso-Desafio-Pm3-de-co-watching-Neflix
+- Protótipo no ar: https://assistir-junto.vercel.app (demonstração em `#demo`), publicado pelo Vercel a cada mudança no repositório https://github.com/rubensguilhon-ux/assistir-junto
 - Protótipo: esta pasta. `npm run dev`; modo protótipo na raiz, modo demonstração em `#demo`.
 - Código de referência: `src/session/session.js` (estado e ações), `src/App.jsx` (simulação, disposição e facilitador), `src/screens/phone/LandscapeSession.jsx` (celular deitado), `src/screens/PhoneFrame.jsx` (moldura), `src/demo/Demo.jsx` (15 telas e variações).

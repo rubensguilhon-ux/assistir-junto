@@ -2,6 +2,8 @@
 
 Protótipo do conceito Assistir Junto: o filme na TV, a conversa no celular. Conceito não oficial, inspirado na Netflix, feito para o desafio da PM3.
 
+**No ar:** https://assistir-junto.vercel.app (modo demonstração em https://assistir-junto.vercel.app/#demo). Melhor em tela de 1280 px de largura ou mais; em telas menores, celular e TV ficam um embaixo do outro.
+
 ## Rodar
 
 Precisa do Node.js 18 ou mais novo.
