@@ -1,0 +1,9 @@
+/* Cena placeholder do título fictício "O Farol de Bruma".
+   Estas cores representam a imagem do filme, não a interface, por isso não são tokens. */
+.scene { position: absolute; inset: 0; overflow: hidden; background: #0e1824; }
+.scene-sky { position: absolute; inset: 0; background: linear-gradient(180deg, #1b2a3d 0%, #0e1824 55%, #070c12 100%); }
+.scene-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 40% at 72% 30%, rgba(255, 214, 140, 0.28), transparent 60%); }
+.scene-tower { position: absolute; left: 70%; bottom: 30%; width: 2.4%; height: 28%; background: linear-gradient(90deg, #121a24, #1f2c3a); clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%); }
+.scene-hill { position: absolute; left: -10%; right: -10%; bottom: 0; height: 34%; background: #05080c; border-radius: 50% 50% 0 0 / 30% 30% 0 0; }
+.scene-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.6)); }
+.scene-dim .scene-vignette { background: rgba(0, 0, 0, 0.55); }

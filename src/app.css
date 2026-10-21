@@ -1,0 +1,130 @@
+/* Layout do protótipo. Só tokens do design system (D38). */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; background: var(--surface); color: var(--ink); font-family: var(--font-sans); }
+p, h1, h2, dl, dd, figure { margin: 0; }
+.text-muted { color: var(--ink-muted); }
+.text-center { text-align: center; }
+
+.stack-0 { display: flex; flex-direction: column; }
+.stack-1 { display: flex; flex-direction: column; gap: var(--space-1); }
+.stack-2 { display: flex; flex-direction: column; gap: var(--space-2); }
+.stack-3 { display: flex; flex-direction: column; gap: var(--space-3); }
+.stack-4 { display: flex; flex-direction: column; gap: var(--space-4); }
+.stack-5 { display: flex; flex-direction: column; gap: var(--space-5); }
+.stack-6 { display: flex; flex-direction: column; gap: var(--space-6); }
+.stack-7 { display: flex; flex-direction: column; gap: var(--space-7); }
+.row-2 { display: flex; align-items: center; gap: var(--space-2); }
+.row-3 { display: flex; align-items: flex-start; gap: var(--space-3); }
+.wrap { flex-wrap: wrap; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.row-center { display: flex; align-items: center; justify-content: center; gap: var(--space-4); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+
+/* Casca do app */
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+.app-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--line-subtle); }
+/* Celular sempre à esquerda; a TV no centro; o facilitador à direita.
+   Sem TV, só o celular, no centro, com o botão de girar fora da moldura. */
+.proto { display: grid; grid-template-columns: auto minmax(0, 1fr) 280px; align-items: start; gap: var(--space-6); padding: var(--space-6); }
+.proto-solo { grid-template-columns: minmax(0, 1fr) 280px; }
+.proto-phone { display: flex; flex-direction: column; align-items: center; gap: var(--space-5); }
+.proto-solo .proto-phone { justify-self: center; }
+.proto-tv { min-width: 0; align-self: center; }
+.proto-rotate { align-items: center; max-width: 360px; text-align: center; }
+.facilitator { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); border: 1px solid var(--line-subtle); border-radius: var(--radius-md); }
+@media (max-width: 1280px) { .proto, .proto-solo { grid-template-columns: 1fr; } .proto-phone { justify-self: center; } }
+.facilitator-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+
+/* Moldura do celular (casca do protótipo): 390 × 844 de tela em pé, 844 × 390 deitado. */
+.device { position: relative; flex: none; padding: 12px; border-radius: 60px; background: var(--scrim-strong); border: 2px solid var(--surface-hover); box-shadow: var(--shadow-overlay); }
+.device-btn { position: absolute; width: 4px; border-radius: var(--radius-pill); background: var(--surface-hover); }
+.device-btn-a { left: -5px; top: 150px; height: 32px; }
+.device-btn-b { left: -5px; top: 200px; height: 56px; }
+.device-btn-c { right: -5px; top: 220px; height: 88px; }
+.device-landscape .device-btn-a { left: auto; right: 150px; top: -5px; width: 32px; height: 4px; }
+.device-landscape .device-btn-b { left: auto; right: 200px; top: -5px; width: 56px; height: 4px; }
+.device-landscape .device-btn-c { right: auto; left: 220px; top: auto; bottom: -5px; width: 88px; height: 4px; }
+.phone { position: relative; width: 390px; height: 844px; border-radius: 48px; background: var(--surface); overflow: hidden; }
+.device-landscape .phone { width: 844px; height: 390px; }
+.phone-status { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 44px; font-size: 16px; font-weight: 600; z-index: 3; pointer-events: none; }
+.phone-status-icons { display: flex; align-items: center; gap: 6px; }
+.phone-status-icons svg { fill: var(--ink); }
+.phone-battery { position: relative; width: 25px; height: 12px; border: 1px solid var(--ink-muted); border-radius: 4px; padding: 1px; }
+.phone-battery i { display: block; width: 80%; height: 100%; border-radius: 2px; background: var(--ink); }
+.phone-island { position: absolute; top: 11px; left: 50%; width: 124px; height: 36px; margin-left: -62px; border-radius: var(--radius-pill); background: var(--scrim-strong); z-index: 4; pointer-events: none; }
+.device-landscape .phone-island { top: 50%; left: 11px; width: 36px; height: 124px; margin: -62px 0 0; }
+.phone-home { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: var(--radius-pill); background: var(--ink); z-index: 4; pointer-events: none; }
+.device-landscape .phone-home { width: 200px; margin-left: -100px; opacity: .6; }
+.phone-screen { position: absolute; top: 54px; left: 0; right: 0; bottom: 21px; overflow-y: auto; }
+.device-landscape .phone-screen { inset: 0; overflow: hidden; }
+/* Giro com animação curta (até 200 ms, D41) */
+.device-turn { animation: device-to-portrait 200ms ease-out; }
+.device-landscape.device-turn { animation-name: device-to-landscape; }
+@keyframes device-to-landscape { from { transform: rotate(90deg) scale(.85); } to { transform: none; } }
+@keyframes device-to-portrait { from { transform: rotate(-90deg) scale(.85); } to { transform: none; } }
+.screen { position: relative; min-height: 100%; display: flex; flex-direction: column; }
+.screen-body { padding: var(--space-4); }
+.screen-pad-top { padding-top: var(--space-6); }
+.hero { position: relative; height: 300px; flex: none; }
+.hero-short { height: 200px; }
+.sheet-layer { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; background: var(--scrim); z-index: 2; }
+.sheet-layer > * { max-height: 88%; overflow-y: auto; }
+.chat-list { display: flex; flex-direction: column; gap: var(--space-3); }
+.summary { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+
+/* Sessão no celular */
+.screen-session { height: 100%; }
+.video { position: relative; aspect-ratio: 16 / 9; flex: none; }
+.video-notices { position: absolute; top: var(--space-2); right: var(--space-2); transform: scale(.55); transform-origin: top right; }
+.video-rotate { position: absolute; left: var(--space-2); bottom: var(--space-2); }
+
+/* Celular deitado (R28): tela cheia, ou vídeo encolhido com a folha lateral */
+.land { position: absolute; inset: 0; display: flex; background: var(--scrim-strong); }
+.land-video { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; }
+.land-frame { position: relative; width: 100%; height: 100%; }
+.land-split .land-video { flex-direction: column; align-items: stretch; justify-content: center; gap: var(--space-3); padding: var(--space-4) var(--space-4) var(--space-4) 56px; }
+.land-split .land-frame { flex: none; height: auto; aspect-ratio: 16 / 9; border-radius: var(--radius-md); overflow: hidden; transform-origin: left center; animation: land-shrink 200ms ease-out; }
+.land-mini { animation: land-fade 200ms ease-out; }
+@keyframes land-shrink { from { transform: scale(1.6); } to { transform: none; } }
+.land-tap { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.land-tap:focus-visible { outline: 2px solid var(--focus); outline-offset: -4px; }
+.land-notices { position: absolute; top: 64px; left: 56px; transform: scale(.55); transform-origin: top left; pointer-events: none; }
+.land-split .land-notices { top: var(--space-2); left: var(--space-2); transform: scale(.45); }
+.land-controls { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, var(--scrim) 0%, transparent 32%, transparent 58%, var(--scrim) 100%); animation: land-fade 150ms ease-out; }
+.land-controls > * { pointer-events: auto; }
+.land-top { position: absolute; top: var(--space-3); left: 56px; right: 56px; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+.land-bottom { position: absolute; left: 56px; right: 56px; bottom: var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); }
+.land-ptt { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: var(--space-3); animation: land-fade 150ms ease-out; }
+.land-ptt-hint { max-width: 190px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.land-side { position: relative; z-index: 1; flex: none; width: 340px; height: 100%; animation: land-slide 200ms ease-out; }
+.land-side > .aj-sheet { height: 100%; }
+.land-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+@keyframes land-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes land-slide { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+.session-top { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4) var(--space-4) 0; }
+.session-people { display: flex; gap: var(--space-4); padding: var(--space-4); overflow-x: auto; }
+.session-controls { display: flex; flex-direction: column; gap: var(--space-3); padding: 0 var(--space-4); }
+.session-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-4); }
+
+/* TV */
+.tv { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--line-subtle); background: var(--surface); }
+.tv-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+.tv-screen { position: absolute; inset: 0; overflow: hidden; color: var(--ink); }
+.tv-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--tv-safe-y) var(--tv-safe-x); text-align: center; }
+.tv-lobby { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: var(--tv-safe-y) var(--tv-safe-x); max-width: 1400px; }
+.tv-people { display: flex; gap: var(--space-6); }
+.tv-person { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+.tv-fill { position: absolute; inset: 0; display: flex; }
+.tv-fill > * { flex: 1; }
+.tv-notices { position: absolute; top: var(--tv-safe-y); right: var(--tv-safe-x); display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-4); }
+.tv-player { position: absolute; left: var(--tv-safe-x); right: var(--tv-safe-x); bottom: var(--tv-safe-y); display: flex; flex-direction: column; gap: var(--space-4); }
+
+/* Demonstração */
+.demo { display: flex; flex-direction: column; gap: var(--space-8); padding: var(--space-6); }
+.demo-group { display: flex; flex-direction: column; gap: var(--space-5); }
+.demo-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-6); }
+.demo-item { display: flex; flex-direction: column; gap: var(--space-2); }
+.demo-tv { width: 640px; max-width: 100%; }
+.demo-landscape { max-width: 100%; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0s !important; transition-duration: 0s !important; } }
