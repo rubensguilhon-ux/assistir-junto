@@ -167,3 +167,8 @@ body { background: var(--surface); color: var(--ink); font-family: var(--font-sa
 .aj-tvnotice-emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 32px; line-height: 1; }
 @keyframes aj-pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .aj-av-reaction { animation: none; } }
+
+/* Nível real da voz: com liveLevel, as barras e o anel seguem --aj-mic-level (0 a 1), definido por quem usa o componente */
+.aj-ptt-live .aj-ptt-level i { animation: none; height: 18px; transform-origin: center; transform: scaleY(calc(0.2 + var(--aj-mic-level, 0) * var(--aj-bar, 1))); transition: transform 80ms linear; }
+.aj-ptt-live .aj-ptt-level i:nth-child(1) { --aj-bar: 0.6; } .aj-ptt-live .aj-ptt-level i:nth-child(2) { --aj-bar: 1; } .aj-ptt-live .aj-ptt-level i:nth-child(3) { --aj-bar: 0.85; } .aj-ptt-live .aj-ptt-level i:nth-child(4) { --aj-bar: 0.5; }
+.aj-ptt-live .aj-ptt-ring { transform: scale(calc(1 + var(--aj-mic-level, 0) * 0.22)); transition: transform 80ms linear; }

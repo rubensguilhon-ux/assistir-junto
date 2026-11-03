@@ -69,7 +69,7 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 | `Button` | Ações com texto; `primary`, `secondary`, `ghost` | Ações só com ícone |
 | `IconButton` | Controles do player e atalhos (chat, participantes, microfone) | Ações principais da tela |
 | `ParticipantAvatar` | Representar uma pessoa: iniciais, cor, anfitrião, falando, microfone desligado | Fotos ou personagens |
-| `PushToTalk` | O botão de falar; `variant="glass"` sobre o vídeo em tela cheia, com o celular deitado | Qualquer outro botão |
+| `PushToTalk` | O botão de falar; `variant="glass"` sobre o vídeo em tela cheia, com o celular deitado; `liveLevel` com o microfone de verdade | Qualquer outro botão |
 | `ReactionBar` | Reações rápidas durante o filme | Emojis em outros lugares |
 | `ChatMessage` | Mensagens e avisos do sistema no chat | Avisos na TV |
 | `ChatComposer` | Escrever no chat: campo, enviar e Enter; limite de 200 (D49) | Mensagens na TV |
@@ -96,6 +96,7 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 
 - **Botão de falar (D29):** segurar fala, soltar para. Arrastar 64px para cima trava o microfone aberto; tocar em "Fechar" destrava. A instrução completa aparece só na primeira vez; depois, o rótulo é "Falar".
 - **Volume do filme:** enquanto alguém fala, o volume do filme abaixa para todos e volta ao soltar. O nível ainda está em aberto (ver Em aberto).
+- **Som no protótipo (D51):** trilha e vozes simuladas em `src/session/audio.js`. O som só começa depois de um toque, ninguém ouve a própria voz de volta, e o microfone de verdade serve apenas para mostrar o nível da voz no botão de falar (`PushToTalk liveLevel`).
 - **Sincronia (D22):** atraso de até 2 s é corrigido sem aviso ("Ajustando o atraso"). Acima de 2 s, aparece "Voltar ao grupo".
 - **Pausa (D19):** qualquer pessoa pausa para o grupo, e a TV mostra quem pausou. O anfitrião pode ativar "Só eu posso pausar".
 - **Anfitrião sai (D20):** quem entrou primeiro assume, e a sessão continua.

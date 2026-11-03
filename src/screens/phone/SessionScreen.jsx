@@ -98,6 +98,7 @@ export default function SessionScreen({ s, act }) {
         <ReactionBar selected={s.reaction} onReact={(r) => act('react', { label: r.label })} />
         <PushToTalk
           state={s.ptt}
+          liveLevel={s.mic === 'on'}
           showHint={s.firstTalk && s.ptt === 'idle'}
           onPressStart={() => act('pttStart')}
           onPressEnd={() => act('pttEnd')}

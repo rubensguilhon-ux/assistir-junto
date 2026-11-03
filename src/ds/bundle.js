@@ -115,7 +115,7 @@
         state === 'talking' ? h('div', { className: 'aj-ptt-lockhint aj-ptt-lockhint-glass', 'aria-hidden': 'true' }, h(Icon, { name: 'lock', size: 16 }), h(Icon, { name: 'chevron-up', size: 16 })) : null,
         h('button', {
           type: 'button',
-          className: cx('aj-ptt', 'aj-ptt-glass', 'aj-ptt-' + state, props.focused && 'aj-focused'),
+          className: cx('aj-ptt', 'aj-ptt-glass', 'aj-ptt-' + state, props.liveLevel && 'aj-ptt-live', props.focused && 'aj-focused'),
           'aria-pressed': state === 'talking' || state === 'locked',
           'aria-label': state === 'locked' ? 'Microfone aberto. Toque para fechar' : state === 'muted' ? 'Microfone desligado' : state === 'talking' ? 'Falando' : 'Segure para falar',
           onPointerDown: down, onPointerMove: move, onPointerUp: up, onPointerCancel: up,
@@ -130,7 +130,7 @@
       state === 'talking' ? h('div', { className: 'aj-ptt-lockhint', 'aria-hidden': 'true' }, h(Icon, { name: 'lock', size: 18 }), h(Icon, { name: 'chevron-up', size: 18 })) : null,
       h('button', {
         type: 'button',
-        className: cx('aj-ptt', 'aj-ptt-' + state, props.focused && 'aj-focused'),
+        className: cx('aj-ptt', 'aj-ptt-' + state, props.liveLevel && 'aj-ptt-live', props.focused && 'aj-focused'),
         'aria-pressed': state === 'talking' || state === 'locked',
         onPointerDown: down, onPointerMove: move, onPointerUp: up, onPointerCancel: up,
         onClick: state === 'muted' ? props.onUnmute : state === 'locked' ? props.onUnlock : undefined

@@ -10,7 +10,7 @@
 
 **Data de criação:** 2026-10-19
 
-**Última atualização:** 2026-10-20 (rev5). ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
+**Última atualização:** 2026-11-03 (rev6). Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
 
 **Como ler:** este arquivo diz o quê e por quê; o `design.md` diz como. Quem implementa, pessoa ou agente de IA, lê os dois. Os códigos `Dnn` apontam para o diário de decisões; `Rnn` e `Nnn` são requisitos; `Pnn` e `Mnn` são pendências.
 
@@ -97,7 +97,7 @@ Nada abaixo deve ser implementado nesta versão. Se uma tarefa parecer exigir al
 | Fórum ou discussão depois do filme | Apareceu só de forma parcial na pesquisa | D14 |
 | Convite por perfil ou lista de contatos | O convite é por link | D22 |
 | Servidor, contas e login reais | O protótipo simula a sala no navegador | D35 |
-| Voz e áudio reais no protótipo | O protótipo não capta nem toca som; a regra do volume (R13) está só no design | D35 |
+| Voz real entre pessoas | O protótipo toca um som simulado (trilha gerada e vozes sintéticas) e mede o microfone só para mostrar o nível; nada é gravado nem enviado | D35, D51 |
 | Sincronia real entre aparelhos | O protótipo simula atraso e correção | D35 |
 | Assinatura, pagamento ou cadastro | Cada pessoa usa a própria conta | D22 |
 | Marca Netflix (logo, Netflix Sans, #E50914, imagens de títulos reais) | Conceito não oficial | D5 |
@@ -167,7 +167,7 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 
 ### Fluxo D · Conversa durante o filme
 
-> **Implementação, com pendências:** R13 em Design; R14 e R16 em Definição. Telas 7 a 10.
+> **Implementação, com pendências:** R14 e R16 em Definição. Telas 7 a 10.
 
 **Ponto de entrada:** sessão em andamento.
 
@@ -407,7 +407,19 @@ Só tokens; nenhum valor visual solto no código (D38). Fonte: `src/ds/tokens.js
 
 ### Volume do filme durante a fala
 
-Enquanto alguém fala, o filme baixa para todos e volta ao soltar. Proposta de nível: 30% (`DUCK_LEVEL = 0.3`), ainda em definição (R14). No protótipo, sem áudio, a regra só existe como constante.
+Enquanto alguém fala, o filme baixa para todos e volta ao soltar. Proposta de nível: 30% (`DUCK_LEVEL = 0.3`), ainda em definição (R14).
+
+No protótipo (`src/session/audio.js`, D51):
+
+| Som | Como é feito | Quando toca |
+| --- | --- | --- |
+| Trilha do filme | Mar, zumbido grave e buzina de nevoeiro gerados pela Web Audio API | Sessão rodando; para na pausa e no fim |
+| Voz dos amigos | Síntese de fala do navegador, em português quando houver voz instalada | Quando o Bruno fala (a cada 15 s ou pelo botão "Bruno fala agora") |
+| Filme baixando | O volume da trilha vai para 15%, 30% ou 50%, escolhido no painel do facilitador | Enquanto alguém fala, inclusive a própria pessoa |
+| Sinal do microfone | Bipe curto ao abrir e ao fechar | Ao segurar e soltar o botão de falar |
+| Microfone de verdade | O navegador pede permissão no primeiro toque em falar; a voz só é medida para as barras do botão | Enquanto o microfone está aberto |
+
+O som só começa depois do primeiro toque, porque o navegador exige uma interação. Ninguém ouve a própria voz de volta. Com a permissão negada, a fala continua simulada.
 
 ### Sincronia
 
@@ -480,7 +492,8 @@ O protótipo não tem servidor. A sala inteira é um estado em `src/session/sess
   reaction: null,
   orientation: 'portrait', // portrait | landscape
   controls: false,         // controles sobre o vídeo deitado
-  rotated: false           // já girou uma vez
+  rotated: false,          // já girou uma vez
+  mic: 'off'               // microfone de verdade: off | asking | on | denied
 }
 ```
 
@@ -515,7 +528,8 @@ Constantes: `MAX_PEOPLE = 8`, `SYNC_LIMIT_S = 2`, `DUCK_LEVEL = 0.3`, `TITLE` ("
 | `showControls` / `hideControls` | | Mostra e esconde os controles sobre o vídeo deitado | R28 |
 | `openSheet` / `closeSheet` | `sheet` | Abre e fecha folhas | R17, R21 |
 | `end` | | Encerra para todos | R27 |
-| `reset` | | Volta ao estado inicial | |
+| `mic` | `status` | Estado do microfone de verdade | R09 |
+| `reset` | | Volta ao estado inicial, mantendo o microfone | |
 
 Os controles do facilitador (modo protótipo) disparam essas ações para simular o que os outros fariam; não fazem parte da interface.
 
@@ -575,8 +589,8 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 | R10 | Dado que a pessoa está segurando, quando arrasta 64 px para cima, então o microfone trava ("Microfone aberto"); quando toca em "Fechar", então destrava | D29 | Implementação |
 | R11 | Dado que a pessoa ainda não falou, então o botão diz "Segure para falar" com a dica de arrastar; depois da primeira fala, só "Falar" | D29 | Implementação |
 | R12 | Dado que alguém fala, então o avatar ganha o anel verde no celular e a TV mostra "Nome está falando" | D27, D28 | Implementação |
-| R13 | Dado que alguém fala, então o volume do filme cai para todos e volta ao soltar | Princípios do design.md | Design |
-| R14 | Dado que o nível de volume foi testado, então ele está registrado no diário; proposta de 30% | Em aberto | Definição |
+| R13 | Dado que alguém fala, então o volume do filme cai para todos e volta ao soltar. No protótipo, dá para ouvir a trilha baixar com a voz do Bruno e com a própria fala | Princípios do design.md, D51 | Implementação |
+| R14 | Dado que o nível de volume foi testado, então ele está registrado no diário; proposta de 30%. O painel do facilitador troca entre 15%, 30% e 50% para comparar no teste | Em aberto | Definição |
 | R15 | Dado que a pessoa toca numa das cinco reações, então a reação fica marcada por 1 s | D15, D30 | Implementação |
 | R16 | Dado que alguém reage, então a TV mostra a reação na forma decidida. Proposta simulada no protótipo para avaliação: aviso "Nome reagiu 😱" na TV e o emoji sobre o avatar no celular, por 2 s (telas 7b e 10b; facilitador "Bruno escreve e Carla reage") | Em aberto | Definição |
 | R17 | Dado que a pessoa abre o chat, então vê as mensagens (autor e hora) e os avisos do sistema (entrou, saiu, pausou) | D8 | Implementação |
@@ -623,7 +637,7 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 
 ### Incertezas de produto
 
-- Quanto o filme baixa enquanto alguém fala (R14); proposta: 30%.
+- Quanto o filme baixa enquanto alguém fala (R14); proposta: 30%, agora comparável no teste com 15% e 50%.
 - Como as reações aparecem na TV (R16); proposta: no aviso discreto, por 2 s.
 - Qual a meta de latência da voz entre quem fala e quem ouve.
 
@@ -647,7 +661,7 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 | P4 | `react` só marca a reação no próprio celular; nada chega à TV nem aos outros | Não, depende de R16 |
 | P5 | ✓ Resolvido na rev5: o texto provisório saiu e o campo entrou | |
 | P11 | O protótipo roda no computador e não simula o teclado do celular. Na versão real, com o celular deitado, a folha sobe com o teclado e o miniplayer fica no topo | Não |
-| P6 | `DUCK_LEVEL` existe, mas não é usado, porque o protótipo não tem áudio | Não |
+| P6 | ✓ Resolvido na rev6: `DUCK_LEVEL` passou a controlar o volume da trilha simulada | |
 | P7 | Dois desvios do design.md aguardam revisão: cores provisórias da cena do filme (`scene.css`) e medidas de moldura em px | Não, mas bloqueia N05 |
 | P8 | Auditoria completa de WCAG 2.1 AA, com leitor de tela e teclado | Não, mas bloqueia N02 |
 | P9 | A moldura do celular e as margens do modo deitado (56px nas laterais, 28px do botão de falar) usam px sem token. Propor tokens ou aprovar como desvio, junto com P7 | Não, mas bloqueia N05 |
@@ -656,6 +670,8 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 
 - "Escreva uma mensagem", "Mensagem para o grupo" (nome acessível do campo) e "Enviar" (ChatComposer)
 - "Nome reagiu" (aviso da TV, proposta R16) e "Não acredito que a luz apagou de novo" (mensagem de exemplo)
+- Falas do Bruno: "Gente, a luz do farol apagou de novo.", "Eu não confio nessa faroleira.", "Que som foi esse lá embaixo?", "Pausa rapidinho, eu perdi essa parte.", "Essa trilha está me deixando nervoso." e "Olha isso, olha isso! Alguém subiu a escada do farol."
+- Painel do facilitador: "Som do protótipo", "Som ligado", "Som desligado", "Bruno fala agora" e os estados do microfone
 - "Gire para ver maior" (botão sobre o vídeo em pé)
 - "Mostrar os controles" e "Esconder os controles" (nome acessível da camada de toque, deitado)
 - "Segure para falar · arraste para cima para travar" (dica da primeira vez, deitado)
@@ -708,6 +724,7 @@ Só as decisões que mudam a implementação. As do case (D1 a D4, D6, D10, D14,
 | D47 | Botão de falar em vidro (`PushToTalk variant="glass"`) que aparece ao tocar na tela, com giro animado em até 200 ms | Discreto sobre o filme e a um polegar de distância; a voz é a interação principal | Rubens |
 | D48 | Protótipo com moldura de celular estilo iPhone; celular à esquerda, TV no centro; sem TV, só o celular, com botão de girar fora da moldura | Deixa evidente que é um celular e reflete o uso real: a conversa na mão, o filme na frente | Rubens |
 | D49 | ChatComposer aprovado: campo "Escreva uma mensagem" e enviar; Enter envia; limite de 200 com contador a partir de 180; no rodapé do chat, em pé e deitado; mensagens fora da TV | Libera R18 e mantém a TV só para o filme e os avisos | Rubens |
+| D51 | Som simulado no protótipo: trilha gerada no navegador, vozes sintéticas dos amigos, filme baixando enquanto alguém fala com nível ajustável no facilitador, e microfone de verdade opcional, só para o nível da voz | Deixa o teste ouvir a conversa e o volume do filme, e permite comparar o nível do R14 com pessoas | Rubens |
 
 ## 12. Referências
 

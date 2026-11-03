@@ -42,6 +42,7 @@ export default function LandscapeSession({ s, act }) {
     <PushToTalk
       variant={variant}
       state={s.ptt}
+      liveLevel={s.mic === 'on'}
       showHint={variant !== 'glass' && s.firstTalk && s.ptt === 'idle'}
       onPressStart={() => act('pttStart')}
       onPressEnd={() => act('pttEnd')}

@@ -41,7 +41,8 @@ export function initialState() {
     reaction: null,
     orientation: 'portrait', // portrait | landscape (só com o filme no celular)
     controls: false, // controles sobre o vídeo em tela cheia
-    rotated: false // já girou uma vez: some a dica de girar
+    rotated: false, // já girou uma vez: some a dica de girar
+    mic: 'off' // microfone de verdade: off | asking | on | denied
   };
 }
 
@@ -181,8 +182,10 @@ export function reducer(state, action) {
       return { ...state, sheet: action.sheet };
     case 'end':
       return { ...state, playing: false, phase: 'ended', sheet: null, notices: [], orientation: 'portrait', controls: false };
+    case 'mic':
+      return { ...state, mic: action.status };
     case 'reset':
-      return initialState();
+      return { ...initialState(), mic: state.mic };
     case 'set':
       return { ...state, ...action.patch };
     default:

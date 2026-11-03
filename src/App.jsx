@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Button } from './ds/index.js';
-import { reducer, initialState, me, clock, PEOPLE } from './session/session.js';
+import { reducer, initialState, me, clock, PEOPLE, DUCK_LEVEL } from './session/session.js';
+import { ensureAudio, setFilmLevel, setMuted, earcon, say, stopVoices, startMic, micLevel } from './session/audio.js';
 import PhoneFrame from './screens/PhoneFrame.jsx';
 import TvFrame from './screens/TvFrame.jsx';
 import TitleScreen from './screens/phone/TitleScreen.jsx';
@@ -19,9 +20,24 @@ export function PhoneFor({ s, act }) {
   return <SessionScreen s={s} act={act} />;
 }
 
+// Falas simuladas do Bruno, ouvidas pela síntese de fala do navegador.
+const BRUNO_LINES = [
+  'Gente, a luz do farol apagou de novo.',
+  'Eu não confio nessa faroleira.',
+  'Que som foi esse lá embaixo?',
+  'Pausa rapidinho, eu perdi essa parte.',
+  'Essa trilha está me deixando nervoso.'
+];
+
+export function brunoSpeaks(dispatch, line) {
+  dispatch({ type: 'otherSpeaks', id: 'bruno' });
+  say('bruno', line, () => dispatch({ type: 'otherStops', id: 'bruno' }));
+}
+
 function useSimulation(s, dispatch) {
   const joined = useRef(false);
   const chatted = useRef(false);
+  const lineIndex = useRef(0);
 
   // Convidados entram depois do convite.
   useEffect(() => {
@@ -49,16 +65,15 @@ function useSimulation(s, dispatch) {
     return () => clearInterval(t);
   }, [s.playing, dispatch]);
 
-  // Bruno fala de tempos em tempos, quando ninguém está falando.
+  // Bruno fala de tempos em tempos, quando ninguém está falando. Com som ligado, dá para ouvir a fala.
   useEffect(() => {
-    if (s.phase !== 'session' || !s.playing || !s.people.some((p) => p.id === 'bruno')) return undefined;
-    let stop;
+    if (s.phase !== 'session' || !s.playing || s.speakingId !== null || !s.people.some((p) => p.id === 'bruno')) return undefined;
     const start = setTimeout(() => {
-      dispatch({ type: 'otherSpeaks', id: 'bruno' });
-      stop = setTimeout(() => dispatch({ type: 'otherStops', id: 'bruno' }), 3000);
-    }, 9000);
-    return () => { clearTimeout(start); clearTimeout(stop); };
-  }, [s.phase, s.playing, s.speakingId === null, s.people.length, dispatch]);
+      brunoSpeaks(dispatch, BRUNO_LINES[lineIndex.current % BRUNO_LINES.length]);
+      lineIndex.current += 1;
+    }, 15000);
+    return () => clearTimeout(start);
+  }, [s.phase, s.playing, s.speakingId, s.people.length, dispatch]);
 
   // Primeiras mensagens do chat.
   useEffect(() => {
@@ -108,7 +123,50 @@ function useSimulation(s, dispatch) {
   }, [s.sync, dispatch]);
 }
 
-function Facilitator({ s, dispatch }) {
+// Som do protótipo: o filme toca enquanto a sessão roda e baixa para o nível escolhido enquanto alguém fala (R13, R14).
+function useAudio(s, active, soundOn, duck, dispatch) {
+  const anyoneSpeaking = s.speakingId !== null || s.ptt === 'talking' || s.ptt === 'locked';
+  const level = !active || s.phase !== 'session' || !s.playing ? 0 : anyoneSpeaking ? duck : 1;
+  useEffect(() => { setMuted(!soundOn); }, [soundOn]);
+  useEffect(() => { setFilmLevel(level); }, [level]);
+  useEffect(() => { if (!s.playing || s.phase !== 'session') stopVoices(); }, [s.playing, s.phase]);
+  const prev = useRef(s.ptt);
+  useEffect(() => {
+    const was = prev.current;
+    prev.current = s.ptt;
+    if (!active) return;
+    const open = (p) => p === 'talking' || p === 'locked';
+    if (!open(was) && open(s.ptt)) {
+      earcon('open');
+      if (s.mic === 'off') {
+        dispatch({ type: 'mic', status: 'asking' });
+        startMic().then((status) => dispatch({ type: 'mic', status }));
+      }
+    }
+    if (open(was) && !open(s.ptt)) earcon('close');
+  }, [s.ptt, active]);
+
+  // Com o microfone ligado, o nível da voz vai para o botão de falar pela variável --aj-mic-level.
+  const micOpen = active && s.mic === 'on' && (s.ptt === 'talking' || s.ptt === 'locked');
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!micOpen) {
+      root.style.setProperty('--aj-mic-level', '0');
+      return undefined;
+    }
+    let frame;
+    const loop = () => {
+      root.style.setProperty('--aj-mic-level', micLevel().toFixed(2));
+      frame = requestAnimationFrame(loop);
+    };
+    loop();
+    return () => cancelAnimationFrame(frame);
+  }, [micOpen]);
+}
+
+const DUCK_OPTIONS = [0.15, 0.3, 0.5];
+
+function Facilitator({ s, dispatch, soundOn, setSoundOn, duck, setDuck }) {
   const inSession = s.phase === 'session';
   const has = (id) => s.people.some((p) => p.id === id);
   const go = (a) => () => dispatch(a);
@@ -125,8 +183,21 @@ function Facilitator({ s, dispatch }) {
         <Button variant="ghost" disabled={!inSession || !has('carla')} onClick={() => { dispatch({ type: 'leave', id: 'carla' }); setTimeout(() => dispatch({ type: 'back', id: 'carla', device: 'tv' }), 4000); }}>Carla cai e volta</Button>
         <Button variant="ghost" disabled={!inSession || !has('bruno')} onClick={go({ type: 'message', id: 'bruno', text: 'Pausa que eu perdi', time: clock(s) })}>Bruno escreve</Button>
         <Button variant="ghost" disabled={!inSession || !has('bruno') || !reactor} onClick={() => { dispatch({ type: 'message', id: 'bruno', text: 'Não acredito que a luz apagou de novo', time: clock(s) }); setTimeout(() => dispatch({ type: 'otherReacts', id: reactor, emoji: '😱', label: 'Susto' }), 1500); }}>Bruno escreve e {reactor ? PEOPLE[reactor].short : 'alguém'} reage</Button>
+        <Button variant="ghost" disabled={!inSession || !s.playing || !has('bruno') || s.speakingId !== null} onClick={() => brunoSpeaks(dispatch, 'Olha isso, olha isso! Alguém subiu a escada do farol.')}>Bruno fala agora</Button>
         <Button variant="ghost" disabled={!inSession} onClick={go({ type: 'end' })}>Fim do filme</Button>
         <Button variant="ghost" onClick={go({ type: 'reset' })}>Recomeçar</Button>
+      </div>
+      <div className="facilitator-sound stack-2">
+        <p className="label">Som do protótipo</p>
+        <p className="caption text-muted">Trilha do filme e vozes simuladas no navegador. Use fone ou caixa de som.</p>
+        <Button variant={soundOn ? 'secondary' : 'ghost'} onClick={() => setSoundOn(!soundOn)}>{soundOn ? 'Som ligado' : 'Som desligado'}</Button>
+        <p className="caption text-muted">Microfone: {{ off: 'pedido no primeiro toque em falar', asking: 'aguardando a permissão do navegador', on: 'ligado (só mede o nível da voz, nada é gravado)', denied: 'bloqueado pelo navegador; a fala continua simulada' }[s.mic]}</p>
+        <p className="caption text-muted">Volume do filme enquanto alguém fala (R14)</p>
+        <div className="row-2 wrap" role="group" aria-label="Volume do filme enquanto alguém fala">
+          {DUCK_OPTIONS.map((d) => (
+            <Button key={d} variant={duck === d ? 'primary' : 'ghost'} onClick={() => setDuck(d)}>{Math.round(d * 100)}%</Button>
+          ))}
+        </div>
       </div>
     </aside>
   );
@@ -136,11 +207,17 @@ export default function App() {
   const [mode, setMode] = useState(() => (location.hash === '#demo' ? 'demo' : 'proto'));
   const [s, dispatch] = useReducer(reducer, undefined, initialState);
   const turned = useRef(false);
+  const [soundOn, setSoundOn] = useState(true);
+  const [duck, setDuck] = useState(DUCK_LEVEL);
+  // Todo toque libera o som: o navegador só toca áudio depois de uma interação.
   const act = useCallback((type, payload = {}) => {
+    ensureAudio();
     if (type === 'rotate') turned.current = true;
     dispatch({ type, ...payload });
   }, []);
+  const facilitate = useCallback((a) => { ensureAudio(); dispatch(a); }, []);
   useSimulation(s, dispatch);
+  useAudio(s, mode === 'proto', soundOn, duck, dispatch);
   const filmOnPhone = me(s).device === 'phone' && s.phase !== 'title';
   const canRotate = s.phase === 'session';
 
@@ -181,7 +258,7 @@ export default function App() {
               </TvFrame>
             </div>
           )}
-          <Facilitator s={s} dispatch={dispatch} />
+          <Facilitator s={s} dispatch={facilitate} soundOn={soundOn} setSoundOn={(v) => { ensureAudio(); setSoundOn(v); }} duck={duck} setDuck={(v) => { ensureAudio(); setDuck(v); }} />
         </main>
       )}
     </div>
