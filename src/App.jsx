@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { Button } from './ds/index.js';
 import { reducer, initialState, me, clock, PEOPLE, DUCK_LEVEL } from './session/session.js';
 import { ensureAudio, setFilmLevel, setMuted, earcon, say, stopVoices, startMic, micLevel } from './session/audio.js';
@@ -9,6 +9,7 @@ import LobbyScreen from './screens/phone/LobbyScreen.jsx';
 import SessionScreen from './screens/phone/SessionScreen.jsx';
 import LandscapeSession from './screens/phone/LandscapeSession.jsx';
 import EndScreen from './screens/phone/EndScreen.jsx';
+import LeftScreen from './screens/phone/LeftScreen.jsx';
 import TvScreen from './screens/tv/TvScreen.jsx';
 import Demo from './demo/Demo.jsx';
 
@@ -16,6 +17,7 @@ export function PhoneFor({ s, act }) {
   if (s.phase === 'title') return <TitleScreen s={s} act={act} />;
   if (s.phase === 'lobby' || s.phase === 'countdown') return <LobbyScreen s={s} act={act} />;
   if (s.phase === 'ended') return <EndScreen s={s} act={act} />;
+  if (s.phase === 'left') return <LeftScreen s={s} act={act} />;
   if (s.orientation === 'landscape') return <LandscapeSession s={s} act={act} />;
   return <SessionScreen s={s} act={act} />;
 }
@@ -166,6 +168,34 @@ function useAudio(s, active, soundOn, duck, dispatch) {
 
 const DUCK_OPTIONS = [0.15, 0.3, 0.5];
 
+// O celular encolhe para caber na altura da janela, sem rolar a página (D55).
+// A moldura mede 418 × 872 em pé e 872 × 418 deitada.
+function PhoneFit({ landscape, solo, children }) {
+  const box = useRef(null);
+  const [scale, setScale] = useState(1);
+  const w = landscape ? 872 : 418;
+  const h = landscape ? 418 : 872;
+  useLayoutEffect(() => {
+    const fit = () => {
+      const el = box.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      const below = solo ? 96 : 0; // espaço do botão de girar
+      const availH = window.innerHeight - top - 24 - below;
+      const availW = solo ? window.innerWidth - (window.innerWidth > 1100 ? 360 : 48) : window.innerWidth * 0.42;
+      setScale(Math.max(0.45, Math.min(1, availH / h, availW / w)));
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [w, h, solo]);
+  return (
+    <div className="phone-fit" ref={box} style={{ width: w * scale, height: h * scale }}>
+      <div className="phone-fit-inner" style={{ transform: `scale(${scale})` }}>{children}</div>
+    </div>
+  );
+}
+
 function Facilitator({ s, dispatch, soundOn, setSoundOn, duck, setDuck }) {
   const inSession = s.phase === 'session';
   const has = (id) => s.people.some((p) => p.id === id);
@@ -239,9 +269,11 @@ export default function App() {
       ) : (
         <main className={'proto' + (filmOnPhone ? ' proto-solo' : '')}>
           <div className="proto-phone">
-            <PhoneFrame key={s.orientation} label={`Celular de ${me(s).short}`} orientation={s.orientation} animate={turned.current}>
-              <PhoneFor s={s} act={act} />
-            </PhoneFrame>
+            <PhoneFit landscape={s.orientation === 'landscape'} solo={filmOnPhone}>
+              <PhoneFrame key={s.orientation} label={`Celular de ${me(s).short}`} orientation={s.orientation} animate={turned.current}>
+                <PhoneFor s={s} act={act} />
+              </PhoneFrame>
+            </PhoneFit>
             {filmOnPhone ? (
               <div className="proto-rotate stack-2">
                 <Button variant="secondary" icon="rotate" disabled={!canRotate} onClick={() => act('rotate')}>

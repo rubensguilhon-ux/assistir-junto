@@ -63,9 +63,10 @@
     return h('button', {
       type: 'button',
       className: cx('aj-iconbtn', props.surface === 'video' && 'aj-iconbtn-video', props.active && 'aj-iconbtn-active', props.size === 'lg' && 'aj-iconbtn-lg', props.focused && 'aj-focused', props.className),
-      'aria-label': props.label, 'aria-pressed': props.active === undefined ? undefined : !!props.active,
+      'aria-label': props.label + (props.badge ? ', ' + props.badge + (props.badgeLabel ? ' ' + props.badgeLabel : '') : ''), 'aria-pressed': props.active === undefined ? undefined : !!props.active,
       disabled: props.disabled, onClick: props.onClick
-    }, h(Icon, { name: props.icon, size: props.size === 'lg' ? 28 : 22 }));
+    }, h(Icon, { name: props.icon, size: props.size === 'lg' ? 28 : 22 }),
+      props.badge ? h('span', { className: 'aj-iconbtn-badge', 'aria-hidden': 'true' }, props.badge > 9 ? '9+' : props.badge) : null);
   }
 
   function ParticipantAvatar(props) {

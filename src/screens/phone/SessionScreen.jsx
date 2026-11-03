@@ -14,6 +14,7 @@ import {
   TvNotice
 } from '../../ds/index.js';
 import Scene from '../Scene.jsx';
+import LeaveSheet from './LeaveSheet.jsx';
 import { TITLE, PEOPLE, formatTime, me, clock } from '../../session/session.js';
 
 // Telas 8 a 11, 13 e 14: a sessão no celular.
@@ -56,7 +57,7 @@ export default function SessionScreen({ s, act }) {
             <p className="label">{TITLE.name}</p>
             <p className="caption text-muted">{onPhone ? 'No celular' : 'Na TV'} · {s.people.length} {s.people.length === 1 ? 'pessoa' : 'pessoas'}</p>
           </div>
-          <IconButton icon="close" label="Sair da sala" onClick={() => act('end')} />
+          <IconButton icon="close" label="Sair da sala" onClick={() => act('openSheet', { sheet: 'leave' })} />
         </div>
         <SyncIndicator state={s.sync} delay={s.delay ? s.delay + ' s' : undefined} onRejoin={() => act('resync')} />
       </div>
@@ -88,10 +89,10 @@ export default function SessionScreen({ s, act }) {
             disabled={!canPause}
             onClick={() => act(playing ? 'pause' : 'resume', { id: self.id })}
           />
-          <IconButton icon="chat" label="Abrir chat" onClick={() => act('openSheet', { sheet: 'chat' })} />
+          <IconButton icon="chat" label="Abrir chat" badge={s.unread} badgeLabel={s.unread === 1 ? 'mensagem nova' : 'mensagens novas'} onClick={() => act('openSheet', { sheet: 'chat' })} />
           <IconButton icon="people" label="Ver participantes" onClick={() => act('openSheet', { sheet: 'people' })} />
         </div>
-        {!canPause ? <p className="caption text-muted text-center">Só {PEOPLE.ana.short} pode pausar agora.</p> : null}
+        {!canPause ? <p className="caption text-muted text-center">Só {s.people.find((p) => p.host)?.short} pode pausar agora.</p> : null}
       </div>
 
       <div className="session-bottom">
@@ -124,6 +125,12 @@ export default function SessionScreen({ s, act }) {
             </div>
             <ChatComposer onSend={(text) => act('message', { id: self.id, text, time: clock(s) })} />
           </Sheet>
+        </div>
+      ) : null}
+
+      {s.sheet === 'leave' ? (
+        <div className="sheet-layer">
+          <LeaveSheet s={s} act={act} />
         </div>
       ) : null}
 

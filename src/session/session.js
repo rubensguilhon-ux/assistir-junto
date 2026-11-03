@@ -22,7 +22,7 @@ export const PEOPLE = {
 
 export function initialState() {
   return {
-    phase: 'title', // title | lobby | countdown | session | ended
+    phase: 'title', // title | lobby | countdown | session | left | ended
     sheet: null, // invite | chat | people
     copied: false,
     people: [{ ...PEOPLE.ana, id: 'ana', host: true, me: true, device: null }],
@@ -42,7 +42,8 @@ export function initialState() {
     orientation: 'portrait', // portrait | landscape (só com o filme no celular)
     controls: false, // controles sobre o vídeo em tela cheia
     rotated: false, // já girou uma vez: some a dica de girar
-    mic: 'off' // microfone de verdade: off | asking | on | denied
+    mic: 'off', // microfone de verdade: off | asking | on | denied
+    unread: 0 // mensagens de outras pessoas chegadas com o chat fechado
   };
 }
 
@@ -167,19 +168,41 @@ export function reducer(state, action) {
       return {
         ...state,
         people: state.people.map((x) => (x.id === action.id ? { ...x, reaction: action.emoji, reactionLabel: action.label } : x)),
-        notices: [...state.notices.filter((x) => !(x.kind === 'reaction' && x.personId === action.id)), n].slice(-2)
+        notices: [...state.notices.filter((x) => !(x.kind === 'reaction' && x.personId === action.id)), n].slice(-2),
+        // A reação também fica no chat, para quem está com a folha aberta e não vê os avatares (D54).
+        messages: system(state, `${p.short} reagiu ${action.emoji}`)
       };
     }
     case 'clearOtherReaction':
       return { ...state, people: state.people.map((x) => (x.id === action.id ? { ...x, reaction: null, reactionLabel: null } : x)) };
     case 'clearReaction':
       return { ...state, reaction: null };
-    case 'message':
-      return { ...state, messages: [...state.messages, { id: nextId(), kind: 'message', from: action.id, text: action.text, time: action.time }] };
+    case 'message': {
+      const mine = state.people.find((p) => p.id === action.id)?.me;
+      return {
+        ...state,
+        unread: mine || state.sheet === 'chat' ? state.unread : state.unread + 1,
+        messages: [...state.messages, { id: nextId(), kind: 'message', from: action.id, text: action.text, time: action.time }]
+      };
+    }
     case 'dismissNotice':
       return { ...state, notices: state.notices.filter((n) => n.id !== action.id) };
     case 'openSheet':
-      return { ...state, sheet: action.sheet };
+      return { ...state, sheet: action.sheet, unread: action.sheet === 'chat' ? 0 : state.unread };
+    case 'leaveSelf': {
+      // Sair sem encerrar: se quem sai é o anfitrião, o papel passa para quem entrou primeiro (D20, R24).
+      const self = me(state);
+      const next = self.host ? state.people.find((p) => !p.me) : null;
+      const people = state.people.map((p) => (p.me ? { ...p, host: false } : next && p.id === next.id ? { ...p, host: true } : p));
+      let messages = system(state, `${self.short} saiu`);
+      if (next) messages = [...messages, { id: nextId(), kind: 'system', text: `${next.short} agora é o anfitrião` }];
+      return { ...state, phase: 'left', sheet: null, ptt: 'idle', speakingId: null, orientation: 'portrait', controls: false, people, messages, newHost: next ? next.id : state.newHost };
+    }
+    case 'rejoin': {
+      // Volta no ponto atual do grupo (D23), agora como convidado.
+      const self = me(state);
+      return { ...state, phase: 'session', messages: system(state, `${self.short} voltou`), notices: notice(state, 'back', self.id) };
+    }
     case 'end':
       return { ...state, playing: false, phase: 'ended', sheet: null, notices: [], orientation: 'portrait', controls: false };
     case 'mic':

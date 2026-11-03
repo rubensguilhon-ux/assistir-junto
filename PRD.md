@@ -10,7 +10,7 @@
 
 **Data de criação:** 2026-10-19
 
-**Última atualização:** 2026-11-03 (rev6). Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
+**Última atualização:** 2026-11-03 (rev7). Ajustes antes do teste: o X pergunta entre sair e encerrar, e sair passa o papel de anfitrião (R24 em Implementação); contador de mensagens não lidas no chat; reações também no chat; protótipo cabe na tela sem rolar (D52 a D55). Rev6: Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
 
 **Como ler:** este arquivo diz o quê e por quê; o `design.md` diz como. Quem implementa, pessoa ou agente de IA, lê os dois. Os códigos `Dnn` apontam para o diário de decisões; `Rnn` e `Nnn` são requisitos; `Pnn` e `Mnn` são pendências.
 
@@ -24,7 +24,7 @@
 > | **D · Conversa durante o filme** | Implementação, com pendências | R09 a R18, R26 | 7, 8, 9, 10 |
 > | **E · Pausa e controles do anfitrião** | Implementação | R19 a R21 | 11, 12 |
 > | **F · Exceções: sem TV, atraso, queda** | Implementação | R22, R23, R25 | 13, 14 |
-> | **F4 · Anfitrião sai** | Design (não programado) | R24 | sem tela própria |
+> | **F4 · Sair da sala** | Implementação | R24 | 14d, 14e |
 > | **F5 · Filme no celular deitado** | Implementação | R28 | 14b, 14c |
 > | **G · Fim da sessão** | Implementação | R27 | 15 |
 
@@ -198,7 +198,7 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 
 ### Fluxo F · Exceções
 
-> **Implementação**, menos F4, que está em Design. Telas 13 e 14.
+> **Implementação.** Telas 13, 14, 14d e 14e.
 
 **F1 · Sem TV (R23).** Quem escolhe "No celular" no lobby segue o mesmo fluxo, com o vídeo no topo do celular, o aviso de quem fala sobre o vídeo e os mesmos controles. O vídeo mostra "Gire para ver maior" até o primeiro giro (F5). A TV dessa pessoa mostra "Assistindo no celular".
 
@@ -214,11 +214,13 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 2. Ao reconectar, a pessoa entra no ponto atual do grupo, não de onde parou.
 3. A TV e o chat avisam "Nome voltou".
 
-**F4 · Anfitrião sai (R24, não programado).**
+**F4 · Sair da sala (R24, D52).**
 
-1. O anfitrião sai da sala.
-2. Quem entrou primeiro vira anfitrião, recebe a coroa e os controles.
-3. O chat avisa a troca e a sessão continua para todos.
+1. A pessoa toca no X da sessão, em pé ou deitado.
+2. O sistema pergunta antes. Para o convidado: "Sair da sala?", com "Sair da sala" e "Cancelar". Para o anfitrião: "Sair ou encerrar?", com "Sair da sala", "Encerrar para todos" e "Cancelar". Anfitrião sozinho na sala só vê "Encerrar para todos".
+3. Se o anfitrião sai, quem entrou primeiro vira anfitrião, recebe a coroa e os controles; o chat avisa "Ana saiu" e "Bruno agora é o anfitrião", e a sessão continua para todos.
+4. Quem saiu vê "O grupo continua assistindo", quem ficou na sala e quem é o anfitrião agora, com "Voltar para a sala" e "Voltar ao início". A TV dessa pessoa mostra "Você saiu da sala".
+5. Em "Voltar para a sala", a pessoa entra no ponto atual do grupo, agora como convidado; a TV e o chat avisam "Ana voltou".
 
 **F5 · Filme no celular deitado (R28).**
 
@@ -237,7 +239,7 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 
 > **Implementação.** Tela 15.
 
-**Ponto de entrada:** fim do filme, ou o anfitrião encerra.
+**Ponto de entrada:** fim do filme, ou o anfitrião escolhe "Encerrar para todos" (F4).
 
 1. O sistema encerra a sessão para todos.
 2. O celular mostra "Vocês assistiram juntos", quem assistiu, tempo juntos e mensagens no chat (R27).
@@ -256,6 +258,7 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 | `phase` | `lobby` | Lobby | Sala criada, esperando o anfitrião começar |
 | `phase` | `countdown` | 3, 2, 1 | Contagem única para todos |
 | `phase` | `session` | Sessão | Filme rodando ou pausado para o grupo |
+| `phase` | `left` | Você saiu da sala | Saiu sem encerrar; o grupo continua |
 | `phase` | `ended` | Fim da sessão | Fim do filme ou encerrado pelo anfitrião |
 | `ptt` | `idle` | "Segure para falar" ou "Falar" | Microfone fechado |
 | `ptt` | `talking` | "Falando…" | Segurando o botão |
@@ -265,7 +268,8 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 | `sync` | `correcting` | "Ajustando o atraso" | Atraso de até 2 s, corrigindo sozinho |
 | `sync` | `behind` | "x s atrás do grupo" | Atraso acima de 2 s |
 | `device` | `tv` / `phone` / `null` | "na TV" / "no celular" / "entrando…" | Onde a pessoa assiste |
-| `sheet` | `invite` / `chat` / `people` / `null` | Folha aberta | Uma folha por vez |
+| `sheet` | `invite` / `chat` / `people` / `leave` / `null` | Folha aberta | Uma folha por vez |
+| `unread` | número | Contador no ícone do chat | Mensagens de outras pessoas com o chat fechado; zera ao abrir |
 | `orientation` | `portrait` / `landscape` | Em pé / deitado | Deitado só com o filme no celular |
 | `controls` | `true` / `false` | Controles sobre o vídeo | Só com o celular deitado; somem em 3 s |
 | `rotated` | `true` / `false` | Dica de girar | Some depois do primeiro giro |
@@ -328,6 +332,15 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 | **Ajustando** | `sync: correcting` | "Ajustando o atraso"; volta a sincronizado em 2 s |
 | **Atrás do grupo** | `sync: behind` | "x s atrás do grupo" e "Voltar ao grupo" |
 | **Sem TV** | `device: phone` | Vídeo no topo, com o último aviso sobre ele |
+
+### Telas 14d e 14e · Sair da sala
+
+| Estado | Gatilho | Comportamento esperado |
+| --- | --- | --- |
+| **Pergunta** | Tocar no X | Folha "Sair ou encerrar?" (anfitrião) ou "Sair da sala?" (convidado); deitado, como folha lateral |
+| **Saiu** | "Sair da sala" | "O grupo continua assistindo", quem ficou, o novo anfitrião, "Voltar para a sala" e "Voltar ao início" |
+| **De volta** | "Voltar para a sala" | Sessão no ponto atual do grupo, como convidado, sem os controles do anfitrião |
+| **Encerrado** | "Encerrar para todos" | Fim da sessão para todos (tela 15) |
 
 ### Telas 14b e 14c · Filme no celular deitado
 
@@ -458,6 +471,15 @@ O som só começa depois do primeiro toque, porque o navegador exige uma intera�
 | Abrir chat ou participantes | O vídeo encolhe e a folha lateral abre; o botão de falar vai para o rodapé da folha |
 | Fim da sessão ou trocar para "Na TV" | O celular volta em pé |
 
+### Mensagens e reações no chat
+
+- Mensagem de outra pessoa com o chat fechado aumenta o contador vermelho no ícone do chat ("9+" acima de 9). Abrir o chat zera o contador (D53).
+- Uma reação de outra pessoa também entra no chat como aviso do sistema, "Carla reagiu 😱", para quem está com a folha aberta e não vê os avatares (D54).
+
+### Protótipo na tela
+
+O celular encolhe para caber na altura da janela, sem rolar a página. Abaixo de 1100 px de largura, celular e TV ficam lado a lado e o painel do facilitador desce (D55).
+
 ### Feedbacks
 
 - Toda mudança de estado aparece na própria tela, junto do controle ou como aviso discreto; não há alerta modal.
@@ -493,7 +515,8 @@ O protótipo não tem servidor. A sala inteira é um estado em `src/session/sess
   orientation: 'portrait', // portrait | landscape
   controls: false,         // controles sobre o vídeo deitado
   rotated: false,          // já girou uma vez
-  mic: 'off'               // microfone de verdade: off | asking | on | denied
+  mic: 'off',              // microfone de verdade: off | asking | on | denied
+  unread: 0                // mensagens novas com o chat fechado
 }
 ```
 
@@ -527,6 +550,8 @@ Constantes: `MAX_PEOPLE = 8`, `SYNC_LIMIT_S = 2`, `DUCK_LEVEL = 0.3`, `TITLE` ("
 | `rotate` | | Gira o celular; deitado começa em tela cheia, sem folha aberta | R28 |
 | `showControls` / `hideControls` | | Mostra e esconde os controles sobre o vídeo deitado | R28 |
 | `openSheet` / `closeSheet` | `sheet` | Abre e fecha folhas | R17, R21 |
+| `leaveSelf` | | Sai sem encerrar; se for o anfitrião, o papel passa para quem entrou primeiro | R24 |
+| `rejoin` | | Volta no ponto atual do grupo, como convidado | R24, R25 |
 | `end` | | Encerra para todos | R27 |
 | `mic` | `status` | Estado do microfone de verdade | R09 |
 | `reset` | | Volta ao estado inicial, mantendo o microfone | |
@@ -593,7 +618,7 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 | R14 | Dado que o nível de volume foi testado, então ele está registrado no diário; proposta de 30%. O painel do facilitador troca entre 15%, 30% e 50% para comparar no teste | Em aberto | Definição |
 | R15 | Dado que a pessoa toca numa das cinco reações, então a reação fica marcada por 1 s | D15, D30 | Implementação |
 | R16 | Dado que alguém reage, então a TV mostra a reação na forma decidida. Proposta simulada no protótipo para avaliação: aviso "Nome reagiu 😱" na TV e o emoji sobre o avatar no celular, por 2 s (telas 7b e 10b; facilitador "Bruno escreve e Carla reage") | Em aberto | Definição |
-| R17 | Dado que a pessoa abre o chat, então vê as mensagens (autor e hora) e os avisos do sistema (entrou, saiu, pausou) | D8 | Implementação |
+| R17 | Dado que a pessoa abre o chat, então vê as mensagens (autor e hora) e os avisos do sistema (entrou, saiu, pausou, reagiu); dado que chega mensagem com o chat fechado, então o ícone do chat mostra o contador, que zera ao abrir | D8, D53, D54 | Implementação |
 | R18 | Dado que o campo está vazio, então enviar fica desabilitado; dado que a pessoa escreve e envia pelo botão ou pelo Enter, então o campo limpa e a mensagem aparece na hora para o grupo, como "Você"; dado que passa de 180 caracteres, então aparece o contador, com limite de 200. Mensagens não aparecem na TV | D8, D36, D49 | Implementação |
 | R26 | Dado que há avisos na TV, então ficam no máximo dois no canto e somem em 3 s, menos "está falando" e "pausou" | design.md | Implementação |
 
@@ -611,7 +636,7 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 | --- | --- | --- | --- |
 | R22 | Dado um atraso de até 2 s, então aparece "Ajustando o atraso" e a correção é sozinha; dado um atraso maior, então aparecem "x s atrás do grupo" e "Voltar ao grupo". No protótipo, o atraso é simulado | D22, D28 | Implementação |
 | R23 | Dado que a pessoa escolheu "No celular", então vê o vídeo no topo, o aviso de quem fala sobre ele, os mesmos controles e "Gire para ver maior" até o primeiro giro | D21, D46 | Implementação |
-| R24 | Dado que o anfitrião sai, então quem entrou primeiro vira anfitrião, recebe a coroa e os controles, e a sessão continua | D20 | Design |
+| R24 | Dado que a pessoa toca no X, então o sistema pergunta antes; dado que o anfitrião escolhe sair, então quem entrou primeiro vira anfitrião, recebe a coroa e os controles, e a sessão continua; dado que escolhe encerrar, então a sessão acaba para todos; quem saiu pode voltar no ponto atual do grupo | D20, D52 | Implementação |
 | R28 | Dado que o filme está no celular e a pessoa gira o aparelho, então o filme ocupa a tela inteira; quando toca no vídeo, então aparecem os controles e o botão de falar em vidro, que somem em 3 s; quando abre chat ou participantes, então o vídeo encolhe e a folha lateral abre ao lado | D46, D47 | Implementação |
 | R25 | Dado que a pessoa reconecta, então entra no ponto atual do grupo, e a TV e o chat mostram "saiu" e "voltou" | D23 | Implementação |
 
@@ -646,7 +671,7 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 | # | Melhoria | Requisito |
 | --- | --- | --- |
 | M1 | ✓ Feito na rev5: ChatComposer criado no design system e ligado ao chat | R18 |
-| M2 | Programar a troca de anfitrião | R24 |
+| M2 | ✓ Feito na rev7: troca de anfitrião ao sair | R24 |
 | M3 | Programar a navegação por controle remoto na TV | N03 |
 | M4 | Mostrar as reações na TV, depois da decisão | R16 |
 | M5 | Fluxo interativo do convidado no modo protótipo (hoje só no modo demonstração) | R03, R04 |
@@ -655,8 +680,8 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 
 | # | Pendência | Bloqueador? |
 | --- | --- | --- |
-| P1 | O "Sair da sala" (IconButton `close`) chama `end` e encerra para todos. Falta separar "Sair" de "Encerrar para todos", que é só do anfitrião | Sim, para R24 |
-| P2 | `leave` tira a pessoa sem passar o papel de anfitrião | Sim, para R24 |
+| P1 | ✓ Resolvido na rev7: o X abre a pergunta; "Encerrar para todos" é só do anfitrião | |
+| P2 | ✓ Resolvido na rev7: `leaveSelf` passa o papel de anfitrião; `leave` segue só para simular queda | |
 | P3 | ✓ Resolvido na rev4: `pttStart`, `pttEnd` e `pttUnlock` usam `me(state).id` | |
 | P4 | `react` só marca a reação no próprio celular; nada chega à TV nem aos outros | Não, depende de R16 |
 | P5 | ✓ Resolvido na rev5: o texto provisório saiu e o campo entrou | |
@@ -672,6 +697,8 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 - "Nome reagiu" (aviso da TV, proposta R16) e "Não acredito que a luz apagou de novo" (mensagem de exemplo)
 - Falas do Bruno: "Gente, a luz do farol apagou de novo.", "Eu não confio nessa faroleira.", "Que som foi esse lá embaixo?", "Pausa rapidinho, eu perdi essa parte.", "Essa trilha está me deixando nervoso." e "Olha isso, olha isso! Alguém subiu a escada do farol."
 - Painel do facilitador: "Som do protótipo", "Som ligado", "Som desligado", "Bruno fala agora" e os estados do microfone
+- Sair: "Sair ou encerrar?", "Sair da sala?", "Sair da sala", "Encerrar para todos", "Cancelar", os textos de explicação da folha, "Você saiu da sala", "O grupo continua assistindo", "Nome agora é o anfitrião.", "Voltar para a sala" e, na TV, "O grupo continua assistindo. Volte pelo celular."
+- Chat: "mensagem nova" e "mensagens novas" (nome acessível do contador) e "Nome reagiu 😱"
 - "Gire para ver maior" (botão sobre o vídeo em pé)
 - "Mostrar os controles" e "Esconder os controles" (nome acessível da camada de toque, deitado)
 - "Segure para falar · arraste para cima para travar" (dica da primeira vez, deitado)
@@ -725,6 +752,10 @@ Só as decisões que mudam a implementação. As do case (D1 a D4, D6, D10, D14,
 | D48 | Protótipo com moldura de celular estilo iPhone; celular à esquerda, TV no centro; sem TV, só o celular, com botão de girar fora da moldura | Deixa evidente que é um celular e reflete o uso real: a conversa na mão, o filme na frente | Rubens |
 | D49 | ChatComposer aprovado: campo "Escreva uma mensagem" e enviar; Enter envia; limite de 200 com contador a partir de 180; no rodapé do chat, em pé e deitado; mensagens fora da TV | Libera R18 e mantém a TV só para o filme e os avisos | Rubens |
 | D51 | Som simulado no protótipo: trilha gerada no navegador, vozes sintéticas dos amigos, filme baixando enquanto alguém fala com nível ajustável no facilitador, e microfone de verdade opcional, só para o nível da voz | Deixa o teste ouvir a conversa e o volume do filme, e permite comparar o nível do R14 com pessoas | Rubens |
+| D52 | O X da sessão pergunta antes: convidado só sai; anfitrião escolhe entre sair, passando o papel a quem entrou primeiro, e encerrar para todos | Um toque por curiosidade não pode derrubar a sessão do grupo | Rubens |
+| D53 | Contador vermelho de mensagens não lidas no ícone do chat, só no celular | Com o chat fechado, nada avisava que chegou mensagem | Rubens |
+| D54 | Reação de outra pessoa também entra no chat como aviso do sistema | Com a folha aberta, os avatares ficam cobertos e a reação se perdia | Rubens |
+| D55 | O protótipo encolhe para caber na tela sem rolar; abaixo de 1100 px, o facilitador desce | Em notebook, celular e TV ficavam um embaixo do outro | Rubens |
 
 ## 12. Referências
 

@@ -67,7 +67,7 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 | Componente | Use para | Não use para |
 | --- | --- | --- |
 | `Button` | Ações com texto; `primary`, `secondary`, `ghost` | Ações só com ícone |
-| `IconButton` | Controles do player e atalhos (chat, participantes, microfone) | Ações principais da tela |
+| `IconButton` | Controles do player e atalhos (chat, participantes, microfone); `badge` para novidades | Ações principais da tela |
 | `ParticipantAvatar` | Representar uma pessoa: iniciais, cor, anfitrião, falando, microfone desligado | Fotos ou personagens |
 | `PushToTalk` | O botão de falar; `variant="glass"` sobre o vídeo em tela cheia, com o celular deitado; `liveLevel` com o microfone de verdade | Qualquer outro botão |
 | `ReactionBar` | Reações rápidas durante o filme | Emojis em outros lugares |
@@ -99,7 +99,9 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 - **Som no protótipo (D51):** trilha e vozes simuladas em `src/session/audio.js`. O som só começa depois de um toque, ninguém ouve a própria voz de volta, e o microfone de verdade serve apenas para mostrar o nível da voz no botão de falar (`PushToTalk liveLevel`).
 - **Sincronia (D22):** atraso de até 2 s é corrigido sem aviso ("Ajustando o atraso"). Acima de 2 s, aparece "Voltar ao grupo".
 - **Pausa (D19):** qualquer pessoa pausa para o grupo, e a TV mostra quem pausou. O anfitrião pode ativar "Só eu posso pausar".
-- **Anfitrião sai (D20):** quem entrou primeiro assume, e a sessão continua.
+- **Sair da sala (D20, D52):** o X sempre pergunta antes. O convidado só sai; o anfitrião escolhe entre sair, e quem entrou primeiro assume, ou encerrar para todos. Quem saiu pode voltar no ponto atual do grupo.
+- **Mensagens novas (D53):** com o chat fechado, o ícone do chat mostra o contador (`IconButton badge`), que zera ao abrir.
+- **Reações no chat (D54):** a reação de outra pessoa também entra no chat como aviso do sistema.
 - **Reconexão (D23):** ao voltar, a pessoa entra no ponto atual do grupo; os outros veem quem saiu e quem voltou.
 - **Limite (D24):** 8 pessoas por sala. O link de uma sala cheia avisa antes de entrar.
 - **Avisos na TV:** no máximo dois empilhados. Somem em 3 s, exceto "está falando", que fica enquanto a pessoa fala.
@@ -117,7 +119,7 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 | Convidado sem conta | Aviso antes de entrar: é preciso ter conta própria |
 | Atraso até 2 s | Correção sem aviso |
 | Atraso acima de 2 s | "Voltar ao grupo" |
-| Anfitrião sai | Próximo a entrar assume |
+| Anfitrião sai | Pergunta antes; ao sair, quem entrou primeiro assume |
 | Sala cheia | Aviso no link, sem entrar |
 | Sem TV | Assiste no celular com a camada social; deitado, o filme em tela cheia |
 | Conexão cai | Volta no ponto atual do grupo; avisos de saída e volta |
@@ -152,7 +154,7 @@ O protótipo tem um modo que mostra cada tela num estado fixo, para gerar as ima
 
 No modo protótipo, o celular fica sempre à esquerda, a TV no centro e os controles do facilitador à direita. Com o filme no celular, a TV sai, o celular vai para o centro e o botão "Girar aparelho" aparece fora da moldura.
 
-As 15 telas, mais as variações 3b, 14b e 14c:
+As 15 telas, mais as variações 3b, 7b, 10b, 14b, 14c, 14d e 14e:
 
 | # | Aparelho | Tela |
 | --- | --- | --- |
@@ -163,15 +165,19 @@ As 15 telas, mais as variações 3b, 14b e 14c:
 | 5 | TV | Lobby na TV |
 | 6 | TV | Contagem regressiva |
 | 7 | TV | Filme com "Bruno está falando" |
-| 8 | Celular | Sessão, primeira vez, com instrução do botão de falar |
+| 7b | TV | Carla reagiu (proposta R16) |
+| 8 | Celular | Sessão, primeira vez, com instrução do botão de falar e mensagem nova no chat |
 | 9 | Celular | Falando e arrastando para travar |
 | 10 | Celular | Chat aberto |
+| 10b | Celular | Bruno escreveu, Carla reagiu |
 | 11 | Celular | Participantes, visão do anfitrião |
 | 12 | TV | Pausado por Ana |
 | 13 | Celular | Atrás do grupo, com "Voltar ao grupo" |
 | 14 | Celular | Sem TV: vídeo no celular com a camada social e "Gire para ver maior" |
 | 14b | Celular deitado | Toque no vídeo: controles e botão de falar em vidro |
 | 14c | Celular deitado | Vídeo encolhido e chat na folha lateral |
+| 14d | Celular | Sair ou encerrar |
+| 14e | Celular | Saiu: o grupo continua e Bruno virou anfitrião |
 | 15 | Celular | Fim da sessão: resumo |
 
 ## Em aberto

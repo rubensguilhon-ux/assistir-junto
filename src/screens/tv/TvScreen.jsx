@@ -69,6 +69,18 @@ export default function TvScreen({ s }) {
     );
   }
 
+  if (s.phase === 'left') {
+    return (
+      <div className="tv-screen">
+        <Scene dim />
+        <div className="tv-center stack-4">
+          <p className="tv-display">Você saiu da sala</p>
+          <p className="tv-body text-muted">O grupo continua assistindo. Volte pelo celular.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (s.phase === 'ended') {
     return (
       <div className="tv-screen">

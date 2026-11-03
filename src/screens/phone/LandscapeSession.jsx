@@ -12,6 +12,7 @@ import {
   TvNotice
 } from '../../ds/index.js';
 import Scene from '../Scene.jsx';
+import LeaveSheet from './LeaveSheet.jsx';
 import { TITLE, PEOPLE, formatTime, me, clock } from '../../session/session.js';
 
 // Telas 14b e 14c: o filme no celular deitado (R28).
@@ -28,7 +29,7 @@ export default function LandscapeSession({ s, act }) {
   }, [s.messages.length, s.sheet]);
   const progress = (s.position / TITLE.duration) * 100;
   const canPause = !s.pauseLocked || self.host;
-  const sheetOpen = s.sheet === 'chat' || s.sheet === 'people';
+  const sheetOpen = s.sheet === 'chat' || s.sheet === 'people' || s.sheet === 'leave';
   const talking = s.ptt === 'talking' || s.ptt === 'locked';
   const showControls = s.controls || !s.playing;
   const showPtt = showControls || talking || sheetOpen;
@@ -73,7 +74,7 @@ export default function LandscapeSession({ s, act }) {
                 </div>
                 <div className="row-2">
                   <SyncIndicator state={s.sync} delay={s.delay ? s.delay + ' s' : undefined} onRejoin={() => act('resync')} />
-                  <IconButton icon="close" label="Sair da sala" surface="video" onClick={() => act('end')} />
+                  <IconButton icon="close" label="Sair da sala" surface="video" onClick={() => act('openSheet', { sheet: 'leave' })} />
                 </div>
               </div>
               <div className="land-bottom">
@@ -88,11 +89,11 @@ export default function LandscapeSession({ s, act }) {
                   />
                   <ReactionBar selected={s.reaction} onReact={(r) => act('react', { label: r.label })} />
                   <div className="row-2">
-                    <IconButton icon="chat" label="Abrir chat" surface="video" onClick={() => act('openSheet', { sheet: 'chat' })} />
+                    <IconButton icon="chat" label="Abrir chat" badge={s.unread} badgeLabel={s.unread === 1 ? 'mensagem nova' : 'mensagens novas'} surface="video" onClick={() => act('openSheet', { sheet: 'chat' })} />
                     <IconButton icon="people" label="Ver participantes" surface="video" onClick={() => act('openSheet', { sheet: 'people' })} />
                   </div>
                 </div>
-                {!canPause ? <p className="caption text-muted">Só {PEOPLE.ana.short} pode pausar agora.</p> : null}
+                {!canPause ? <p className="caption text-muted">Só {s.people.find((p) => p.host)?.short} pode pausar agora.</p> : null}
               </div>
             </div>
           ) : null}
@@ -141,6 +142,12 @@ export default function LandscapeSession({ s, act }) {
             <ChatComposer onSend={(text) => act('message', { id: self.id, text, time: clock(s) })} />
             {ptt('default')}
           </Sheet>
+        </div>
+      ) : null}
+
+      {s.sheet === 'leave' ? (
+        <div className="land-side">
+          <LeaveSheet s={s} act={act} placement="side" />
         </div>
       ) : null}
 

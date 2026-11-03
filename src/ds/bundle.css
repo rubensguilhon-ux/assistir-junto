@@ -172,3 +172,8 @@ body { background: var(--surface); color: var(--ink); font-family: var(--font-sa
 .aj-ptt-live .aj-ptt-level i { animation: none; height: 18px; transform-origin: center; transform: scaleY(calc(0.2 + var(--aj-mic-level, 0) * var(--aj-bar, 1))); transition: transform 80ms linear; }
 .aj-ptt-live .aj-ptt-level i:nth-child(1) { --aj-bar: 0.6; } .aj-ptt-live .aj-ptt-level i:nth-child(2) { --aj-bar: 1; } .aj-ptt-live .aj-ptt-level i:nth-child(3) { --aj-bar: 0.85; } .aj-ptt-live .aj-ptt-level i:nth-child(4) { --aj-bar: 0.5; }
 .aj-ptt-live .aj-ptt-ring { transform: scale(calc(1 + var(--aj-mic-level, 0) * 0.22)); transition: transform 80ms linear; }
+
+/* Contador de novidades no botão de ícone (mensagens não lidas no chat) */
+.aj-iconbtn { position: relative; }
+.aj-iconbtn-badge { position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); border: 2px solid var(--surface); font-size: 11px; line-height: 16px; font-weight: 700; text-align: center; animation: aj-pop 200ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .aj-iconbtn-badge { animation: none; } }

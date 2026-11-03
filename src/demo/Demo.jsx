@@ -7,9 +7,10 @@ import LobbyScreen from '../screens/phone/LobbyScreen.jsx';
 import SessionScreen from '../screens/phone/SessionScreen.jsx';
 import LandscapeSession from '../screens/phone/LandscapeSession.jsx';
 import EndScreen from '../screens/phone/EndScreen.jsx';
+import LeftScreen from '../screens/phone/LeftScreen.jsx';
 import TvScreen from '../screens/tv/TvScreen.jsx';
 
-// Modo demonstração (D34): as 15 telas do design.md em estado fixo, mais as variações 3b, 7b, 10b, 14b e 14c, para as imagens e o fluxo estático do case.
+// Modo demonstração (D34): as 15 telas do design.md em estado fixo, mais as variações 3b, 7b, 10b, 14b, 14c, 14d e 14e, para as imagens e o fluxo estático do case.
 const noop = () => {};
 
 const person = (id, extra = {}) => ({ ...PEOPLE[id], id, ...extra });
@@ -40,7 +41,7 @@ const SCREENS = [
   { n: 6, device: 'tv', title: 'Contagem regressiva', group: 'Lobby e início', el: <TvScreen s={base({ phase: 'countdown', countdown: 3, people: room() })} /> },
   { n: 7, device: 'tv', title: 'Filme com Bruno falando', group: 'Sessão', el: <TvScreen s={session({ speakingId: 'bruno', notices: [n(1, 'speaking', 'bruno')] })} /> },
   { n: '7b', device: 'tv', title: 'Carla reagiu (proposta R16)', group: 'Sessão', el: <TvScreen s={session({ notices: [{ ...n(5, 'reaction', 'carla'), emoji: '😱', label: 'Susto' }] })} /> },
-  { n: 8, device: 'phone', title: 'Sessão, primeira vez', group: 'Sessão', el: <SessionScreen s={session({ firstTalk: true, messages: chat.slice(0, 1) })} act={noop} /> },
+  { n: 8, device: 'phone', title: 'Sessão, primeira vez, mensagem nova', group: 'Sessão', el: <SessionScreen s={session({ firstTalk: true, unread: 1, messages: chat.slice(0, 2) })} act={noop} /> },
   { n: 9, device: 'phone', title: 'Falando, arraste para travar', group: 'Sessão', el: <SessionScreen s={session({ ptt: 'talking', speakingId: 'ana' })} act={noop} /> },
   { n: 10, device: 'phone', title: 'Chat aberto', group: 'Sessão', el: <SessionScreen s={session({ sheet: 'chat', playing: false, pausedBy: 'ana' })} act={noop} /> },
   { n: '10b', device: 'phone', title: 'Bruno escreveu, Carla reagiu', group: 'Sessão', el: <SessionScreen s={session({ people: room().map((p) => (p.id === 'carla' ? { ...p, reaction: '😱', reactionLabel: 'Susto' } : p)), messages: [...chat, { id: 6, kind: 'message', from: 'bruno', text: 'Não acredito que a luz apagou de novo', time: '21:06' }] })} act={noop} /> },
@@ -50,6 +51,8 @@ const SCREENS = [
   { n: 14, device: 'phone', title: 'Sem TV: vídeo no celular', group: 'Exceções e fim', el: <SessionScreen s={session({ people: room({ ana: 'phone' }), speakingId: 'carla', notices: [n(3, 'speaking', 'carla')] })} act={noop} /> },
   { n: '14b', device: 'landscape', title: 'Deitado: toque mostra os controles', group: 'Exceções e fim', el: <LandscapeSession s={session({ people: room({ ana: 'phone' }), orientation: 'landscape', rotated: true, controls: true, firstTalk: true, speakingId: 'carla', notices: [n(4, 'speaking', 'carla')] })} act={noop} /> },
   { n: '14c', device: 'landscape', title: 'Deitado: vídeo encolhe e o chat abre ao lado', group: 'Exceções e fim', el: <LandscapeSession s={session({ people: room({ ana: 'phone' }), orientation: 'landscape', rotated: true, sheet: 'chat', firstTalk: false })} act={noop} /> },
+  { n: '14d', device: 'phone', title: 'Sair ou encerrar', group: 'Exceções e fim', el: <SessionScreen s={session({ sheet: 'leave' })} act={noop} /> },
+  { n: '14e', device: 'phone', title: 'Saiu: Bruno virou anfitrião', group: 'Exceções e fim', el: <LeftScreen s={session({ phase: 'left', people: room().map((p) => (p.id === 'ana' ? { ...p, host: false } : p.id === 'bruno' ? { ...p, host: true } : p)) })} act={noop} /> },
   { n: 15, device: 'phone', title: 'Fim da sessão', group: 'Exceções e fim', el: <EndScreen s={session({ phase: 'ended', playing: false, position: 6152 })} act={noop} /> }
 ];
 
