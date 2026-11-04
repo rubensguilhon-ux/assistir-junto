@@ -64,7 +64,7 @@ export default function LandscapeSession({ s, act }) {
             ))}
           </div>
 
-          <Toasts s={s} act={act} max={1} className={'toasts-land' + (showControls && !sheetOpen ? ' toasts-below-bar' : '')} />
+          <Toasts s={s} act={act} className={'toasts-land' + (showControls && !sheetOpen ? ' toasts-below-bar' : '')} />
           <button type="button" className="land-tap" onClick={tap} aria-label={s.controls ? 'Esconder os controles' : 'Mostrar os controles'} />
 
           {showControls && !sheetOpen ? (

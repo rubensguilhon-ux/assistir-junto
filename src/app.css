@@ -90,7 +90,9 @@ p, h1, h2, dl, dd, figure { margin: 0; }
 .video-notices { position: absolute; top: var(--space-2); left: var(--space-2); transform: scale(.55); transform-origin: top left; }
 .toasts { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 3; display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2); width: 260px; max-width: calc(100% - 2 * var(--space-2)); pointer-events: none; }
 .toasts > * { pointer-events: auto; }
-.toasts-land { top: var(--space-3); right: 56px; }
+/* Deitado, a altura é curta: os avisos ficam lado a lado no canto superior direito, o mais novo à direita, acima do botão de falar. */
+.toasts-land { top: var(--space-3); right: 56px; flex-direction: row; align-items: flex-start; justify-content: flex-end; width: auto; max-width: calc(100% - 112px); }
+.toasts-land > * { width: auto; max-width: 280px; }
 .toasts-land.toasts-below-bar { top: 64px; }
 .video-rotate { position: absolute; left: var(--space-2); bottom: var(--space-2); }
 
@@ -111,7 +113,7 @@ p, h1, h2, dl, dd, figure { margin: 0; }
 .land-top { position: absolute; top: var(--space-3); left: 56px; right: 56px; display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
 .land-bottom { position: absolute; left: 56px; right: 56px; bottom: var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); }
 .land-ptt { position: absolute; right: 28px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: var(--space-3); animation: land-fade 150ms ease-out; }
-.land-ptt-hint { max-width: 190px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--glass); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+.land-ptt-hint { max-width: 190px; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--glass-text); border: 1px solid var(--glass-line); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
 .land-side { position: relative; z-index: 1; flex: none; width: 340px; height: 100%; animation: land-slide 200ms ease-out; }
 .land-side > .aj-sheet { height: 100%; }
 .land-scroll { flex: 1; min-height: 0; overflow-y: auto; }
