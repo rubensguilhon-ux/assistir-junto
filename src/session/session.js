@@ -44,7 +44,7 @@ export function initialState() {
     rotated: false, // já girou uma vez: some a dica de girar
     mic: 'off', // microfone de verdade: off | asking | on | denied
     unread: 0, // mensagens de outras pessoas chegadas com o chat fechado
-    toasts: [] // avisos no celular de mensagens e reações com o chat fechado (D57), no máximo 2
+    toasts: [] // fila de avisos no celular de mensagens e reações com o chat fechado (D57, D59): um por vez, até 6 na fila
   };
 }
 
@@ -172,7 +172,7 @@ export function reducer(state, action) {
         notices: [...state.notices.filter((x) => !(x.kind === 'reaction' && x.personId === action.id)), n].slice(-2),
         // A reação também fica no chat, para quem está com a folha aberta e não vê os avatares (D54).
         messages: system(state, `${p.short} reagiu ${action.emoji}`),
-        toasts: state.sheet === 'chat' ? state.toasts : [...state.toasts, { id: nextId(), kind: 'reaction', personId: action.id, emoji: action.emoji, label: action.label }].slice(-2)
+        toasts: state.sheet === 'chat' ? state.toasts : [...state.toasts, { id: nextId(), kind: 'reaction', personId: action.id, emoji: action.emoji, label: action.label }].slice(-6)
       };
     }
     case 'clearOtherReaction':
@@ -184,7 +184,7 @@ export function reducer(state, action) {
       const toast = !mine && state.sheet !== 'chat';
       return {
         ...state,
-        toasts: toast ? [...state.toasts, { id: nextId(), kind: 'message', personId: action.id, text: action.text }].slice(-2) : state.toasts,
+        toasts: toast ? [...state.toasts, { id: nextId(), kind: 'message', personId: action.id, text: action.text }].slice(-6) : state.toasts,
         unread: mine || state.sheet === 'chat' ? state.unread : state.unread + 1,
         messages: [...state.messages, { id: nextId(), kind: 'message', from: action.id, text: action.text, time: action.time }]
       };

@@ -96,11 +96,15 @@ function useSimulation(s, dispatch) {
     return () => timers.forEach(clearTimeout);
   }, [s.notices, s.playing, dispatch]);
 
-  // Avisos no celular: reação some em 2 s; mensagem em 4 s mais um pouco por letra, até 8 s (D57).
+  // Avisos no celular, um por vez (D59): reação fica 2 s; mensagem 3 s mais 40 ms por letra, até 7 s.
+  // Quando o aviso da vez some, o próximo da fila entra no lugar, com a mesma animação de entrada.
+  const current = s.toasts[0];
   useEffect(() => {
-    const t = s.toasts.map((x) => setTimeout(() => dispatch({ type: 'dismissToast', id: x.id }), x.kind === 'reaction' ? 2000 : Math.min(8000, 4000 + x.text.length * 40)));
-    return () => t.forEach(clearTimeout);
-  }, [s.toasts, dispatch]);
+    if (!current) return undefined;
+    const time = current.kind === 'reaction' ? 2000 : Math.min(7000, 3000 + current.text.length * 40);
+    const t = setTimeout(() => dispatch({ type: 'dismissToast', id: current.id }), time);
+    return () => clearTimeout(t);
+  }, [current && current.id, dispatch]);
 
   // O emoji de quem reagiu some do avatar em 2 s (proposta R16).
   const reacting = s.people.filter((p) => p.reaction).map((p) => p.id).join(',');

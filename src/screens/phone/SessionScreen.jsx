@@ -52,7 +52,7 @@ export default function SessionScreen({ s, act }) {
         </div>
       ) : null}
 
-      <Toasts s={s} act={act} />
+      <Toasts s={s} act={act} className={onPhone ? '' : 'toasts-beside-close'} />
 
       <div className="session-top">
         <div className="row-between">

@@ -10,7 +10,7 @@
 
 **Data de criação:** 2026-10-19
 
-**Última atualização:** 2026-11-04 (rev10). Avisos de mensagem e reação no mesmo canto, com fundo translúcido no limite do contraste AA (D58). Rev9: Mensagens e reações que chegam com o chat fechado aparecem num aviso no canto superior direito do celular (D57). Rev8: Atalho de teclado só no protótipo para falar no teste pelo computador (D56). Rev7: Ajustes antes do teste: o X pergunta entre sair e encerrar, e sair passa o papel de anfitrião (R24 em Implementação); contador de mensagens não lidas no chat; reações também no chat; protótipo cabe na tela sem rolar (D52 a D55). Rev6: Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
+**Última atualização:** 2026-11-04 (rev11). Avisos de mensagem e reação um por vez, em vidro sem moldura; a reação mostra só as iniciais e o emoji (D59). Rev10: avisos no mesmo canto, com fundo translúcido no limite do contraste AA (D58). Rev9: Mensagens e reações que chegam com o chat fechado aparecem num aviso no canto superior direito do celular (D57). Rev8: Atalho de teclado só no protótipo para falar no teste pelo computador (D56). Rev7: Ajustes antes do teste: o X pergunta entre sair e encerrar, e sair passa o papel de anfitrião (R24 em Implementação); contador de mensagens não lidas no chat; reações também no chat; protótipo cabe na tela sem rolar (D52 a D55). Rev6: Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
 
 **Como ler:** este arquivo diz o quê e por quê; o `design.md` diz como. Quem implementa, pessoa ou agente de IA, lê os dois. Os códigos `Dnn` apontam para o diário de decisões; `Rnn` e `Nnn` são requisitos; `Pnn` e `Mnn` são pendências.
 
@@ -270,7 +270,7 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 | `device` | `tv` / `phone` / `null` | "na TV" / "no celular" / "entrando…" | Onde a pessoa assiste |
 | `sheet` | `invite` / `chat` / `people` / `leave` / `null` | Folha aberta | Uma folha por vez |
 | `unread` | número | Contador no ícone do chat | Mensagens de outras pessoas com o chat fechado; zera ao abrir |
-| `toasts` | lista, no máximo 2 | Avisos no canto superior direito do celular | Mensagens e reações com o chat fechado; somem sozinhos ou ao abrir o chat |
+| `toasts` | fila, até 6 | Um aviso por vez no canto superior direito do celular | Mensagens e reações com o chat fechado; cada uma some no seu tempo, ou todas ao abrir o chat |
 | `orientation` | `portrait` / `landscape` | Em pé / deitado | Deitado só com o filme no celular |
 | `controls` | `true` / `false` | Controles sobre o vídeo | Só com o celular deitado; somem em 3 s |
 | `rotated` | `true` / `false` | Dica de girar | Some depois do primeiro giro |
@@ -386,7 +386,7 @@ Todos vêm de `src/ds`. Componente que não estiver aqui não pode ser criado na
 | Sheet | Folha com título e fechar; `placement="side"` ao lado do vídeo | Chat, em pé e deitado |
 | Switch | Trava da pausa | Painel de participantes |
 | Icon | Conjunto do design system | Todas as telas |
-| ChatToast | `message` (iniciais, nome e texto completo; toque abre o chat) e `reaction` | Canto superior direito do celular, com o chat fechado (D57) |
+| ChatToast | `message` (iniciais, nome e texto completo; toque abre o chat) e `reaction` (iniciais e emoji); vidro sem moldura, um por vez | Canto superior direito do celular, com o chat fechado (D57) |
 | ChatComposer | Campo e enviar; Enter envia; limite de 200 com contador a partir de 180 | Rodapé do chat, em pé e deitado (R18) |
 
 ### Tokens aplicados
@@ -403,7 +403,7 @@ Só tokens; nenhum valor visual solto no código (D38). Fonte: `src/ds/tokens.js
 | Avatar | `--avatar-1` a `--avatar-6` | Cor fixa por pessoa |
 | Linha e foco | `--line-subtle`, `--line-strong`, `--focus` | Foco de 4 px na TV (D31) |
 | Camadas | `--scrim`, `--scrim-strong`, `--veil`, `--veil-strong`, `--shadow-sheet`, `--shadow-overlay` | Folhas e cena pausada |
-| Vidro | `--glass`, `--glass-line`, `--glass-text` | Controles flutuando sobre o vídeo; `glass-text` (60%) onde há texto, para manter 4.5:1 sobre qualquer cena |
+| Vidro | `--glass`, `--glass-line`, `--glass-text` | Controles flutuando sobre o vídeo; `glass-text` (cinza a 72%) onde há texto, para manter 4.5:1 sobre qualquer cena |
 | Espaço e forma | `--space-1` a `--space-8`, `--radius-sm` a `--radius-pill` | Escala única |
 | Medidas | `--touch-target` (48 px), `--tv-safe-x`, `--tv-safe-y` | Alvo no celular e área segura na TV |
 | Tipografia | `--font-sans` (Inter) | Escala do design system (D26) |
@@ -477,7 +477,7 @@ O som só começa depois do primeiro toque, porque o navegador exige uma intera�
 
 - Mensagem de outra pessoa com o chat fechado aumenta o contador vermelho no ícone do chat ("9+" acima de 9). Abrir o chat zera o contador (D53).
 - Uma reação de outra pessoa também entra no chat como aviso do sistema, "Carla reagiu 😱", para quem está com a folha aberta e não vê os avatares (D54).
-- Com o chat fechado, mensagens e reações de outras pessoas aparecem num aviso no canto superior direito do celular (`ChatToast`, D57): avatar com as iniciais, nome e o texto completo; ou "Nome reagiu" e o emoji. A mensagem some em 4 s mais 40 ms por letra, até 8 s; a reação em 2 s. Tocar na mensagem abre o chat. Mensagem e reação ficam no mesmo canto, no máximo dois: em pé, um embaixo do outro; deitado, lado a lado, o mais novo à direita, acima do botão de falar; com os controles visíveis, descem para baixo da barra do topo. O fundo é translúcido (`glass-text`, 60% de opacidade, com desfoque), o mínimo que mantém o texto a 4.8:1 mesmo sobre uma cena branca (D58). Só no celular: a TV continua sem mensagens (D49). Sobre o vídeo do celular, a reação aparece só nesse aviso, sem repetir o aviso da TV.
+- Com o chat fechado, mensagens e reações de outras pessoas aparecem num aviso no canto superior direito do celular (`ChatToast`, D57): avatar com as iniciais, nome e o texto completo; ou as iniciais e o emoji. Tocar na mensagem abre o chat. Mensagem e reação aparecem uma por vez, no mesmo canto, sem empilhar: as que chegam juntas entram numa fila (até 6) e cada uma tem seu tempo, a reação 2 s e a mensagem 3 s mais 40 ms por letra, até 7 s (D59). A reação é tratada como uma mensagem curta: só as iniciais e o emoji, sem legenda. Em pé com TV, o aviso fica ao lado do X, sem cobri-lo; sem TV, sobre o vídeo; deitado, na coluna à esquerda do botão de falar, abaixo da barra do topo quando os controles estão visíveis. Só o fundo, em vidro (`glass-text`, cinza médio a 72%, com desfoque), sem borda nem sombra; texto em 13 px. Esse fundo é o mínimo que mantém o texto a 4.6:1 mesmo sobre uma cena branca (D58, D59). Só no celular: a TV continua sem mensagens (D49). Sobre o vídeo do celular, a reação aparece só nesse aviso, sem repetir o aviso da TV.
 
 ### Teclado no protótipo
 
@@ -707,7 +707,7 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 - Painel do facilitador: "Som do protótipo", "Som ligado", "Som desligado", "Bruno fala agora" e os estados do microfone
 - Sair: "Sair ou encerrar?", "Sair da sala?", "Sair da sala", "Encerrar para todos", "Cancelar", os textos de explicação da folha, "Você saiu da sala", "O grupo continua assistindo", "Nome agora é o anfitrião.", "Voltar para a sala" e, na TV, "O grupo continua assistindo. Volte pelo celular."
 - Facilitador: "Teclado no teste" e a explicação do atalho
-- Aviso no celular: "Nome reagiu" e o nome acessível "Nome escreveu: texto. Abrir chat"
+- Aviso no celular: nomes acessíveis "Nome reagiu: Susto" e "Nome escreveu: texto. Abrir chat"
 - Chat: "mensagem nova" e "mensagens novas" (nome acessível do contador) e "Nome reagiu 😱"
 - "Gire para ver maior" (botão sobre o vídeo em pé)
 - "Mostrar os controles" e "Esconder os controles" (nome acessível da camada de toque, deitado)
@@ -768,7 +768,8 @@ Só as decisões que mudam a implementação. As do case (D1 a D4, D6, D10, D14,
 | D55 | O protótipo encolhe para caber na tela sem rolar; abaixo de 1100 px, o facilitador desce | Em notebook, celular e TV ficavam um embaixo do outro | Rubens |
 | D56 | Atalho de teclado só no protótipo: segurar Espaço fala, Enter trava, Espaço fecha | No teste pelo computador, segurar e arrastar com o mouse não representa o polegar no celular | Rubens |
 | D57 | Mensagens e reações com o chat fechado aparecem num aviso no canto superior direito do celular, com as iniciais e o texto completo; só no celular | O contador avisa que chegou algo, mas a conversa acontece durante a cena e precisa ser lida sem abrir o chat | Rubens |
-| D58 | Mensagem e reação no mesmo canto; fundo translúcido com a menor opacidade que mantém bom contraste (60%, 4.8:1 sobre branco) | O aviso deixa a cena aparecer por trás sem perder a leitura | Rubens |
+| D58 | Mensagem e reação no mesmo canto; fundo translúcido com a menor opacidade que mantém bom contraste | O aviso deixa a cena aparecer por trás sem perder a leitura | Rubens |
+| D59 | Avisos um por vez, sem empilhar, cada um com seu tempo; a reação é tratada como texto, só iniciais e emoji; vidro sem moldura (cinza a 72%, 4.6:1 sobre branco) e texto menor | Mais discreto durante o filme; empilhados, os avisos disputavam espaço com o botão de falar e com o X | Rubens |
 
 ## 12. Referências
 

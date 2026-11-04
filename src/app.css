@@ -90,9 +90,10 @@ p, h1, h2, dl, dd, figure { margin: 0; }
 .video-notices { position: absolute; top: var(--space-2); left: var(--space-2); transform: scale(.55); transform-origin: top left; }
 .toasts { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 3; display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2); width: 260px; max-width: calc(100% - 2 * var(--space-2)); pointer-events: none; }
 .toasts > * { pointer-events: auto; }
-/* Deitado, a altura é curta: os avisos ficam lado a lado no canto superior direito, o mais novo à direita, acima do botão de falar. */
-.toasts-land { top: var(--space-3); right: 56px; flex-direction: row; align-items: flex-start; justify-content: flex-end; width: auto; max-width: calc(100% - 112px); }
-.toasts-land > * { width: auto; max-width: 280px; }
+/* Deitado: mesma coluna à direita, ao lado da coluna do botão de falar, sem cobri-lo (D59). */
+.toasts-land { top: var(--space-3); right: 104px; width: 240px; }
+/* Em pé com TV: ao lado do X, sem cobri-lo. */
+.toasts-beside-close { top: var(--space-4); right: 72px; width: 240px; }
 .toasts-land.toasts-below-bar { top: 64px; }
 .video-rotate { position: absolute; left: var(--space-2); bottom: var(--space-2); }
 

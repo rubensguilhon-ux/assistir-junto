@@ -104,7 +104,7 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 - **Teclado no protótipo (D56):** só para o teste no computador, segurar Espaço fala, Enter trava e Espaço fecha. Não vale enquanto se digita.
 - **Mensagens novas (D53):** com o chat fechado, o ícone do chat mostra o contador (`IconButton badge`), que zera ao abrir.
 - **Reações no chat (D54):** a reação de outra pessoa também entra no chat como aviso do sistema.
-- **Avisos no celular (D57):** com o chat fechado, mensagens e reações de outras pessoas aparecem no canto superior direito (`ChatToast`), com as iniciais e o texto completo. Somem sozinhos; tocar na mensagem abre o chat. Só no celular. Fundo translúcido `glass-text` (60%) com desfoque: menos opacidade que isso perde o contraste AA sobre cenas claras (D58).
+- **Avisos no celular (D57):** com o chat fechado, mensagens e reações de outras pessoas aparecem no canto superior direito (`ChatToast`), com as iniciais e o texto completo. Somem sozinhos; tocar na mensagem abre o chat. Só no celular. Um por vez, cada um com seu tempo; a reação mostra só as iniciais e o emoji. Só o fundo em vidro `glass-text` (cinza a 72%) com desfoque, sem moldura: menos que isso perde o contraste AA sobre cenas claras (D58, D59).
 - **Reconexão (D23):** ao voltar, a pessoa entra no ponto atual do grupo; os outros veem quem saiu e quem voltou.
 - **Limite (D24):** 8 pessoas por sala. O link de uma sala cheia avisa antes de entrar.
 - **Avisos na TV:** no máximo dois empilhados. Somem em 3 s, exceto "está falando", que fica enquanto a pessoa fala.

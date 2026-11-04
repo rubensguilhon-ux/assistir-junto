@@ -248,14 +248,18 @@
   // Aviso no celular de mensagem ou reação que chegou com o chat fechado (D57). Fica no canto superior direito.
   function ChatToast(props) {
     var kind = props.kind || 'message';
+    // A reação é tratada como uma mensagem curta: só as iniciais e o emoji, sem legenda (D59).
     var body = kind === 'reaction'
-      ? h('span', { className: 'aj-toast-text' }, h('strong', null, props.name), ' reagiu ', h('span', { className: 'aj-toast-emoji', role: 'img', 'aria-label': props.reactionLabel || props.emoji }, props.emoji))
+      ? h('span', { className: 'aj-toast-emoji', 'aria-hidden': 'true' }, props.emoji)
       : h('span', { className: 'aj-toast-text' }, h('strong', null, props.name), h('span', { className: 'aj-toast-msg' }, props.text));
+    var label = kind === 'reaction'
+      ? props.name + ' reagiu: ' + (props.reactionLabel || props.emoji)
+      : props.name + ' escreveu: ' + props.text + (props.onClick ? '. Abrir chat' : '');
     var inner = [h(ParticipantAvatar, { key: 'a', name: props.name, color: props.color, size: 'sm' }), h(React.Fragment, { key: 'b' }, body)];
     if (props.onClick) {
-      return h('button', { type: 'button', className: cx('aj-toast', 'aj-toast-' + kind, props.className), onClick: props.onClick, 'aria-label': kind === 'reaction' ? undefined : props.name + ' escreveu: ' + props.text + '. Abrir chat' }, inner);
+      return h('button', { type: 'button', className: cx('aj-toast', 'aj-toast-' + kind, props.className), onClick: props.onClick, 'aria-label': label }, inner);
     }
-    return h('div', { className: cx('aj-toast', 'aj-toast-' + kind, props.className), role: 'status' }, inner);
+    return h('div', { className: cx('aj-toast', 'aj-toast-' + kind, props.className), role: 'status', 'aria-label': label }, inner);
   }
 
   function InviteSheet(props) {
