@@ -72,6 +72,7 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 | `PushToTalk` | O botão de falar; `variant="glass"` sobre o vídeo em tela cheia, com o celular deitado; `liveLevel` com o microfone de verdade | Qualquer outro botão |
 | `ReactionBar` | Reações rápidas durante o filme | Emojis em outros lugares |
 | `ChatMessage` | Mensagens e avisos do sistema no chat | Avisos na TV |
+| `ChatToast` | Mensagem ou reação que chegou com o chat fechado, no canto superior direito do celular (D57) | Avisos na TV |
 | `ChatComposer` | Escrever no chat: campo, enviar e Enter; limite de 200 (D49) | Mensagens na TV |
 | `SyncIndicator` | Estado de sincronia no celular | Status de conexão genérico |
 | `PlayerProgress` | Posição no filme, no celular e na TV | Barras de carregamento |
@@ -103,6 +104,7 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 - **Teclado no protótipo (D56):** só para o teste no computador, segurar Espaço fala, Enter trava e Espaço fecha. Não vale enquanto se digita.
 - **Mensagens novas (D53):** com o chat fechado, o ícone do chat mostra o contador (`IconButton badge`), que zera ao abrir.
 - **Reações no chat (D54):** a reação de outra pessoa também entra no chat como aviso do sistema.
+- **Avisos no celular (D57):** com o chat fechado, mensagens e reações de outras pessoas aparecem no canto superior direito (`ChatToast`), com as iniciais e o texto completo. Somem sozinhos; tocar na mensagem abre o chat. Só no celular.
 - **Reconexão (D23):** ao voltar, a pessoa entra no ponto atual do grupo; os outros veem quem saiu e quem voltou.
 - **Limite (D24):** 8 pessoas por sala. O link de uma sala cheia avisa antes de entrar.
 - **Avisos na TV:** no máximo dois empilhados. Somem em 3 s, exceto "está falando", que fica enquanto a pessoa fala.

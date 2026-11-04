@@ -15,6 +15,7 @@ import {
 } from '../../ds/index.js';
 import Scene from '../Scene.jsx';
 import LeaveSheet from './LeaveSheet.jsx';
+import Toasts from './Toasts.jsx';
 import { TITLE, PEOPLE, formatTime, me, clock } from '../../session/session.js';
 
 // Telas 8 a 11, 13 e 14: a sessão no celular.
@@ -39,7 +40,7 @@ export default function SessionScreen({ s, act }) {
         <div className="video">
           <Scene dim={!playing} />
           <div className="video-notices">
-            {s.notices.slice(-1).map((n) => (
+            {s.notices.filter((n) => n.kind !== 'reaction').slice(-1).map((n) => (
               <TvNotice key={n.id} kind={n.kind} name={n.name} color={n.color} emoji={n.emoji} reactionLabel={n.label} />
             ))}
           </div>
@@ -50,6 +51,8 @@ export default function SessionScreen({ s, act }) {
           ) : null}
         </div>
       ) : null}
+
+      <Toasts s={s} act={act} />
 
       <div className="session-top">
         <div className="row-between">

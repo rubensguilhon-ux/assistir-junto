@@ -87,7 +87,11 @@ p, h1, h2, dl, dd, figure { margin: 0; }
 /* Sessão no celular */
 .screen-session { height: 100%; }
 .video { position: relative; aspect-ratio: 16 / 9; flex: none; }
-.video-notices { position: absolute; top: var(--space-2); right: var(--space-2); transform: scale(.55); transform-origin: top right; }
+.video-notices { position: absolute; top: var(--space-2); left: var(--space-2); transform: scale(.55); transform-origin: top left; }
+.toasts { position: absolute; top: var(--space-2); right: var(--space-2); z-index: 3; display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2); width: 260px; max-width: calc(100% - 2 * var(--space-2)); pointer-events: none; }
+.toasts > * { pointer-events: auto; }
+.toasts-land { top: var(--space-3); right: 56px; }
+.toasts-land.toasts-below-bar { top: 64px; }
 .video-rotate { position: absolute; left: var(--space-2); bottom: var(--space-2); }
 
 /* Celular deitado (R28): tela cheia, ou vídeo encolhido com a folha lateral */

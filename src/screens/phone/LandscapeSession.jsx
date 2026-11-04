@@ -13,6 +13,7 @@ import {
 } from '../../ds/index.js';
 import Scene from '../Scene.jsx';
 import LeaveSheet from './LeaveSheet.jsx';
+import Toasts from './Toasts.jsx';
 import { TITLE, PEOPLE, formatTime, me, clock } from '../../session/session.js';
 
 // Telas 14b e 14c: o filme no celular deitado (R28).
@@ -58,11 +59,12 @@ export default function LandscapeSession({ s, act }) {
         <div className="land-frame">
           <Scene dim={!s.playing} />
           <div className="land-notices">
-            {s.notices.slice(-1).map((n) => (
+            {s.notices.filter((n) => n.kind !== 'reaction').slice(-1).map((n) => (
               <TvNotice key={n.id} kind={n.kind} name={n.name} color={n.color} emoji={n.emoji} reactionLabel={n.label} />
             ))}
           </div>
 
+          <Toasts s={s} act={act} max={1} className={'toasts-land' + (showControls && !sheetOpen ? ' toasts-below-bar' : '')} />
           <button type="button" className="land-tap" onClick={tap} aria-label={s.controls ? 'Esconder os controles' : 'Mostrar os controles'} />
 
           {showControls && !sheetOpen ? (

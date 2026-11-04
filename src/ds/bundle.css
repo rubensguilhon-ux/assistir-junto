@@ -177,3 +177,16 @@ body { background: var(--surface); color: var(--ink); font-family: var(--font-sa
 .aj-iconbtn { position: relative; }
 .aj-iconbtn-badge { position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); border: 2px solid var(--surface); font-size: 11px; line-height: 16px; font-weight: 700; text-align: center; animation: aj-pop 200ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .aj-iconbtn-badge { animation: none; } }
+
+/* Aviso de mensagem ou reação no celular, com o chat fechado (D57) */
+.aj-toast { display: flex; align-items: flex-start; gap: var(--space-2); width: 100%; max-width: 260px; padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2); box-sizing: border-box; border: 1px solid var(--line-subtle); border-radius: var(--radius-md); background: var(--surface-sheet); box-shadow: var(--shadow-overlay); color: var(--ink); font: inherit; text-align: left; animation: aj-toast-in 200ms ease-out; }
+button.aj-toast { cursor: pointer; }
+button.aj-toast:hover { background: var(--surface-hover); }
+button.aj-toast:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.aj-toast-text { display: flex; flex-direction: column; min-width: 0; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.aj-toast-reaction .aj-toast-text { display: block; align-self: center; }
+.aj-toast-text strong { font-weight: 700; }
+.aj-toast-msg { color: var(--ink); }
+.aj-toast-emoji { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 18px; line-height: 1; }
+@keyframes aj-toast-in { from { transform: translateY(-6px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .aj-toast { animation: none; } }

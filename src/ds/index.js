@@ -22,6 +22,7 @@ export const {
   Countdown,
   TvNotice,
   ChatComposer,
+  ChatToast,
   Sheet,
   Switch,
   Icon

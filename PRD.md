@@ -10,7 +10,7 @@
 
 **Data de criação:** 2026-10-19
 
-**Última atualização:** 2026-11-03 (rev8). Atalho de teclado só no protótipo para falar no teste pelo computador (D56). Rev7: Ajustes antes do teste: o X pergunta entre sair e encerrar, e sair passa o papel de anfitrião (R24 em Implementação); contador de mensagens não lidas no chat; reações também no chat; protótipo cabe na tela sem rolar (D52 a D55). Rev6: Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
+**Última atualização:** 2026-11-03 (rev9). Mensagens e reações que chegam com o chat fechado aparecem num aviso no canto superior direito do celular (D57). Rev8: Atalho de teclado só no protótipo para falar no teste pelo computador (D56). Rev7: Ajustes antes do teste: o X pergunta entre sair e encerrar, e sair passa o papel de anfitrião (R24 em Implementação); contador de mensagens não lidas no chat; reações também no chat; protótipo cabe na tela sem rolar (D52 a D55). Rev6: Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
 
 **Como ler:** este arquivo diz o quê e por quê; o `design.md` diz como. Quem implementa, pessoa ou agente de IA, lê os dois. Os códigos `Dnn` apontam para o diário de decisões; `Rnn` e `Nnn` são requisitos; `Pnn` e `Mnn` são pendências.
 
@@ -270,6 +270,7 @@ Referência de uso: casal ou grupo de 2 a 4 pessoas, cada uma com a própria con
 | `device` | `tv` / `phone` / `null` | "na TV" / "no celular" / "entrando…" | Onde a pessoa assiste |
 | `sheet` | `invite` / `chat` / `people` / `leave` / `null` | Folha aberta | Uma folha por vez |
 | `unread` | número | Contador no ícone do chat | Mensagens de outras pessoas com o chat fechado; zera ao abrir |
+| `toasts` | lista, no máximo 2 | Avisos no canto superior direito do celular | Mensagens e reações com o chat fechado; somem sozinhos ou ao abrir o chat |
 | `orientation` | `portrait` / `landscape` | Em pé / deitado | Deitado só com o filme no celular |
 | `controls` | `true` / `false` | Controles sobre o vídeo | Só com o celular deitado; somem em 3 s |
 | `rotated` | `true` / `false` | Dica de girar | Some depois do primeiro giro |
@@ -385,6 +386,7 @@ Todos vêm de `src/ds`. Componente que não estiver aqui não pode ser criado na
 | Sheet | Folha com título e fechar; `placement="side"` ao lado do vídeo | Chat, em pé e deitado |
 | Switch | Trava da pausa | Painel de participantes |
 | Icon | Conjunto do design system | Todas as telas |
+| ChatToast | `message` (iniciais, nome e texto completo; toque abre o chat) e `reaction` | Canto superior direito do celular, com o chat fechado (D57) |
 | ChatComposer | Campo e enviar; Enter envia; limite de 200 com contador a partir de 180 | Rodapé do chat, em pé e deitado (R18) |
 
 ### Tokens aplicados
@@ -475,6 +477,7 @@ O som só começa depois do primeiro toque, porque o navegador exige uma intera�
 
 - Mensagem de outra pessoa com o chat fechado aumenta o contador vermelho no ícone do chat ("9+" acima de 9). Abrir o chat zera o contador (D53).
 - Uma reação de outra pessoa também entra no chat como aviso do sistema, "Carla reagiu 😱", para quem está com a folha aberta e não vê os avatares (D54).
+- Com o chat fechado, mensagens e reações de outras pessoas aparecem num aviso no canto superior direito do celular (`ChatToast`, D57): avatar com as iniciais, nome e o texto completo; ou "Nome reagiu" e o emoji. A mensagem some em 4 s mais 40 ms por letra, até 8 s; a reação em 2 s. Tocar na mensagem abre o chat. No máximo dois em pé e um deitado, para não cobrir o botão de falar; deitado, com os controles visíveis, o aviso desce para baixo da barra do topo. Só no celular: a TV continua sem mensagens (D49). Sobre o vídeo do celular, a reação aparece só nesse aviso, sem repetir o aviso da TV.
 
 ### Teclado no protótipo
 
@@ -551,6 +554,7 @@ Constantes: `MAX_PEOPLE = 8`, `SYNC_LIMIT_S = 2`, `DUCK_LEVEL = 0.3`, `TITLE` ("
 | `react` / `clearReaction` | `label` | Marca e desmarca a reação | R15 |
 | `message` | `id`, `text`, `time` | Mensagem no chat | R17 |
 | `dismissNotice` | `id` | Tira um aviso da TV | R26 |
+| `dismissToast` | `id` | Tira um aviso de mensagem ou reação do celular | R17 |
 | `rotate` | | Gira o celular; deitado começa em tela cheia, sem folha aberta | R28 |
 | `showControls` / `hideControls` | | Mostra e esconde os controles sobre o vídeo deitado | R28 |
 | `openSheet` / `closeSheet` | `sheet` | Abre e fecha folhas | R17, R21 |
@@ -703,6 +707,7 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 - Painel do facilitador: "Som do protótipo", "Som ligado", "Som desligado", "Bruno fala agora" e os estados do microfone
 - Sair: "Sair ou encerrar?", "Sair da sala?", "Sair da sala", "Encerrar para todos", "Cancelar", os textos de explicação da folha, "Você saiu da sala", "O grupo continua assistindo", "Nome agora é o anfitrião.", "Voltar para a sala" e, na TV, "O grupo continua assistindo. Volte pelo celular."
 - Facilitador: "Teclado no teste" e a explicação do atalho
+- Aviso no celular: "Nome reagiu" e o nome acessível "Nome escreveu: texto. Abrir chat"
 - Chat: "mensagem nova" e "mensagens novas" (nome acessível do contador) e "Nome reagiu 😱"
 - "Gire para ver maior" (botão sobre o vídeo em pé)
 - "Mostrar os controles" e "Esconder os controles" (nome acessível da camada de toque, deitado)
@@ -762,6 +767,7 @@ Só as decisões que mudam a implementação. As do case (D1 a D4, D6, D10, D14,
 | D54 | Reação de outra pessoa também entra no chat como aviso do sistema | Com a folha aberta, os avatares ficam cobertos e a reação se perdia | Rubens |
 | D55 | O protótipo encolhe para caber na tela sem rolar; abaixo de 1100 px, o facilitador desce | Em notebook, celular e TV ficavam um embaixo do outro | Rubens |
 | D56 | Atalho de teclado só no protótipo: segurar Espaço fala, Enter trava, Espaço fecha | No teste pelo computador, segurar e arrastar com o mouse não representa o polegar no celular | Rubens |
+| D57 | Mensagens e reações com o chat fechado aparecem num aviso no canto superior direito do celular, com as iniciais e o texto completo; só no celular | O contador avisa que chegou algo, mas a conversa acontece durante a cena e precisa ser lida sem abrir o chat | Rubens |
 
 ## 12. Referências
 
