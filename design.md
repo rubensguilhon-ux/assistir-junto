@@ -100,6 +100,7 @@ Diretrizes de design para quem for codar o Assistir Junto, pessoa ou agente de I
 - **Sincronia (D22):** atraso de até 2 s é corrigido sem aviso ("Ajustando o atraso"). Acima de 2 s, aparece "Voltar ao grupo".
 - **Pausa (D19):** qualquer pessoa pausa para o grupo, e a TV mostra quem pausou. O anfitrião pode ativar "Só eu posso pausar".
 - **Sair da sala (D20, D52):** o X sempre pergunta antes. O convidado só sai; o anfitrião escolhe entre sair, e quem entrou primeiro assume, ou encerrar para todos. Quem saiu pode voltar no ponto atual do grupo.
+- **Teclado no protótipo (D56):** só para o teste no computador, segurar Espaço fala, Enter trava e Espaço fecha. Não vale enquanto se digita.
 - **Mensagens novas (D53):** com o chat fechado, o ícone do chat mostra o contador (`IconButton badge`), que zera ao abrir.
 - **Reações no chat (D54):** a reação de outra pessoa também entra no chat como aviso do sistema.
 - **Reconexão (D23):** ao voltar, a pessoa entra no ponto atual do grupo; os outros veem quem saiu e quem voltou.

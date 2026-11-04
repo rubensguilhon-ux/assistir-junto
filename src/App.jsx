@@ -168,6 +168,42 @@ function useAudio(s, active, soundOn, duck, dispatch) {
 
 const DUCK_OPTIONS = [0.15, 0.3, 0.5];
 
+// Atalho só do protótipo, para o teste no computador (D56): segurar Espaço fala; com Espaço seguro, Enter trava o
+// microfone; com o microfone travado, Espaço fecha. Não vale enquanto se digita no chat.
+function usePushToTalkKeys(s, act, active) {
+  const ref = useRef(s);
+  ref.current = s;
+  useEffect(() => {
+    if (!active) return undefined;
+    const typing = (e) => e.target instanceof HTMLElement && (e.target.matches('input, textarea') || e.target.isContentEditable);
+    const down = (e) => {
+      const st = ref.current;
+      if (st.phase !== 'session' || typing(e)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (e.repeat) return;
+        if (st.ptt === 'idle') act('pttStart');
+        else if (st.ptt === 'locked') act('pttUnlock');
+      } else if (e.code === 'Enter' && st.ptt === 'talking') {
+        e.preventDefault();
+        act('pttLock');
+      }
+    };
+    const up = (e) => {
+      const st = ref.current;
+      if (e.code !== 'Space' || typing(e)) return;
+      e.preventDefault();
+      if (st.ptt === 'talking') act('pttEnd');
+    };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+    };
+  }, [active, act]);
+}
+
 // O celular encolhe para caber na altura da janela, sem rolar a página (D55).
 // A moldura mede 418 × 872 em pé e 872 × 418 deitada.
 function PhoneFit({ landscape, solo, children }) {
@@ -218,6 +254,8 @@ function Facilitator({ s, dispatch, soundOn, setSoundOn, duck, setDuck }) {
         <Button variant="ghost" onClick={go({ type: 'reset' })}>Recomeçar</Button>
       </div>
       <div className="facilitator-sound stack-2">
+        <p className="label">Teclado no teste</p>
+        <p className="caption text-muted">Segure Espaço para falar. Com Espaço seguro, aperte Enter para travar o microfone; Espaço de novo fecha.</p>
         <p className="label">Som do protótipo</p>
         <p className="caption text-muted">Trilha do filme e vozes simuladas no navegador. Use fone ou caixa de som.</p>
         <Button variant={soundOn ? 'secondary' : 'ghost'} onClick={() => setSoundOn(!soundOn)}>{soundOn ? 'Som ligado' : 'Som desligado'}</Button>
@@ -248,6 +286,7 @@ export default function App() {
   const facilitate = useCallback((a) => { ensureAudio(); dispatch(a); }, []);
   useSimulation(s, dispatch);
   useAudio(s, mode === 'proto', soundOn, duck, dispatch);
+  usePushToTalkKeys(s, act, mode === 'proto');
   const filmOnPhone = me(s).device === 'phone' && s.phase !== 'title';
   const canRotate = s.phase === 'session';
 

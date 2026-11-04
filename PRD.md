@@ -10,7 +10,7 @@
 
 **Data de criação:** 2026-10-19
 
-**Última atualização:** 2026-11-03 (rev7). Ajustes antes do teste: o X pergunta entre sair e encerrar, e sair passa o papel de anfitrião (R24 em Implementação); contador de mensagens não lidas no chat; reações também no chat; protótipo cabe na tela sem rolar (D52 a D55). Rev6: Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
+**Última atualização:** 2026-11-03 (rev8). Atalho de teclado só no protótipo para falar no teste pelo computador (D56). Rev7: Ajustes antes do teste: o X pergunta entre sair e encerrar, e sair passa o papel de anfitrião (R24 em Implementação); contador de mensagens não lidas no chat; reações também no chat; protótipo cabe na tela sem rolar (D52 a D55). Rev6: Som simulado no protótipo: trilha do filme, vozes sintéticas dos amigos, filme baixando enquanto alguém fala (R13 em Implementação; R14 testável) e microfone de verdade opcional, só para medir o nível da voz (D51). Rev5: ChatComposer aprovado e ligado ao chat; R18 em Implementação (D49). Rev4: Celular deitado com o filme no celular (R28), moldura de celular no protótipo e nova disposição: celular à esquerda, TV no centro (D46 a D48). Rev3: Estrutura alinhada ao modelo de PRD de produto usado no trabalho do Rubens: contexto, fluxos com ponto de entrada e saída, mapa de estados por tela, componentes por tela, contrato do estado simulado, critérios de aceite por fluxo, pendências separadas e histórico de decisões. Mantidos da rev2: status por requisito, metas de validação e a tabela de fora do escopo com motivo.
 
 **Como ler:** este arquivo diz o quê e por quê; o `design.md` diz como. Quem implementa, pessoa ou agente de IA, lê os dois. Os códigos `Dnn` apontam para o diário de decisões; `Rnn` e `Nnn` são requisitos; `Pnn` e `Mnn` são pendências.
 
@@ -476,6 +476,10 @@ O som só começa depois do primeiro toque, porque o navegador exige uma intera�
 - Mensagem de outra pessoa com o chat fechado aumenta o contador vermelho no ícone do chat ("9+" acima de 9). Abrir o chat zera o contador (D53).
 - Uma reação de outra pessoa também entra no chat como aviso do sistema, "Carla reagiu 😱", para quem está com a folha aberta e não vê os avatares (D54).
 
+### Teclado no protótipo
+
+Só para o teste no computador (D56), não faz parte do produto: segurar Espaço fala; com Espaço seguro, Enter trava o microfone; com o microfone travado, Espaço fecha. O atalho não vale enquanto se digita no chat. O painel do facilitador explica o atalho.
+
 ### Protótipo na tela
 
 O celular encolhe para caber na altura da janela, sem rolar a página. Abaixo de 1100 px de largura, celular e TV ficam lado a lado e o painel do facilitador desce (D55).
@@ -698,6 +702,7 @@ Cada requisito passa por cinco status, nesta ordem; só o Rubens move um requisi
 - Falas do Bruno: "Gente, a luz do farol apagou de novo.", "Eu não confio nessa faroleira.", "Que som foi esse lá embaixo?", "Pausa rapidinho, eu perdi essa parte.", "Essa trilha está me deixando nervoso." e "Olha isso, olha isso! Alguém subiu a escada do farol."
 - Painel do facilitador: "Som do protótipo", "Som ligado", "Som desligado", "Bruno fala agora" e os estados do microfone
 - Sair: "Sair ou encerrar?", "Sair da sala?", "Sair da sala", "Encerrar para todos", "Cancelar", os textos de explicação da folha, "Você saiu da sala", "O grupo continua assistindo", "Nome agora é o anfitrião.", "Voltar para a sala" e, na TV, "O grupo continua assistindo. Volte pelo celular."
+- Facilitador: "Teclado no teste" e a explicação do atalho
 - Chat: "mensagem nova" e "mensagens novas" (nome acessível do contador) e "Nome reagiu 😱"
 - "Gire para ver maior" (botão sobre o vídeo em pé)
 - "Mostrar os controles" e "Esconder os controles" (nome acessível da camada de toque, deitado)
@@ -756,6 +761,7 @@ Só as decisões que mudam a implementação. As do case (D1 a D4, D6, D10, D14,
 | D53 | Contador vermelho de mensagens não lidas no ícone do chat, só no celular | Com o chat fechado, nada avisava que chegou mensagem | Rubens |
 | D54 | Reação de outra pessoa também entra no chat como aviso do sistema | Com a folha aberta, os avatares ficam cobertos e a reação se perdia | Rubens |
 | D55 | O protótipo encolhe para caber na tela sem rolar; abaixo de 1100 px, o facilitador desce | Em notebook, celular e TV ficavam um embaixo do outro | Rubens |
+| D56 | Atalho de teclado só no protótipo: segurar Espaço fala, Enter trava, Espaço fecha | No teste pelo computador, segurar e arrastar com o mouse não representa o polegar no celular | Rubens |
 
 ## 12. Referências
 
